@@ -1,0 +1,17 @@
+query {
+  repository(owner:"appium", name:"appium") {
+  pullRequests(last: 10) {
+  edges {
+  node {
+  number
+  author {
+  login
+
+}
+merged
+baseRefName
+}
+}
+}
+}
+}
