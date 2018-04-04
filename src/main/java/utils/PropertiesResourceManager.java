@@ -1,14 +1,13 @@
 package utils;
 
+import org.apache.log4j.Logger;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
-import org.apache.log4j.Logger;
-
 /**
  * @author Anastasia Pauliuchuk
  *         created:  1/3/2018.

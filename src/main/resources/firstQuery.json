@@ -1,0 +1,1 @@
+{"query":"query {   repository(owner: \"AnastasiaPauliuchuk\", name: \"GitTestAPI\") {     pullRequests(last: 10) {       edges {         node {           number           author {             login           }           merged           baseRefName         }       }     } } }","variables":"{}"}

@@ -1,1 +1,0 @@
-{"query":"query\n{\n  repository(owner: \"AnastasiaPauliuchuk\", name: \"GitTestAPI\") {\n    pullRequests(last: 10) {\n      edges {\n        node {\n          number\n          author {\n            login\n          }\n          merged\n          baseRefName\n        }\n      }\n    }\n  }\n}","variables":"{}"}

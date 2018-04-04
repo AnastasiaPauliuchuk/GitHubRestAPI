@@ -21,14 +21,21 @@ public class GitHubManager {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer "+ accessToken);
 
-        String requestJson = "{\"query\":\"query\\n{\\n  repository(owner: \\\"AnastasiaPauliuchuk\\\", name: \\\"GitTestAPI\\\") {\\n    pullRequests(last: 10) {\\n      edges {\\n        node {\\n          number\\n          author {\\n            login\\n          }\\n          merged\\n          baseRefName\\n        }\\n      }\\n    }\\n  }\\n}\",\"variables\":\"{}\"}";
+        String requestJson = "{\"query\":\"query {   repository(owner: \\\"AnastasiaPauliuchuk\\\", name: \\\"GitTestAPI\\\") {     pullRequests(last: 10) {       edges {         node {           number           author {             login           }           merged           baseRefName         }       }     } } }\",\"variables\":\"{}\"}";
         HttpEntity<String> entity = new HttpEntity<String>(requestJson, headers);
 
-        ResponseEntity<String> response
-                = restTemplate.exchange(RESOURCE_URL, HttpMethod.POST,entity,String.class);
+        ResponseEntity<String> response = restTemplate.exchange(RESOURCE_URL, HttpMethod.POST,entity,String.class);
 
         System.out.println(response.getStatusCode());
         System.out.println(response.toString());
+        System.out.println(response.getBody());
+
+        GitHubResponse request = new GitHubResponse();
+        HttpEntity<GitHubResponse> httpRequest = new HttpEntity<GitHubResponse>(request, headers);
+
+        GitHubResponse result = restTemplate.postForObject(RESOURCE_URL, entity, GitHubResponse.class);
+        System.out.println(result.data);
+
         return "";
     }
 
@@ -39,7 +46,5 @@ public class GitHubManager {
     public static void main(String[] args) {
         getPullRequests();
     }
-
-
 
 }
