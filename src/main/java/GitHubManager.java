@@ -2,10 +2,14 @@ import model.JsonPullRequestParser;
 import model.PullRequest;
 import model.WebHook;
 import org.springframework.http.*;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import utils.PropertiesResourceManager;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class GitHubManager {
@@ -26,6 +30,7 @@ public class GitHubManager {
     private static  String repositoryOwner;
     private static  String repositoryName;
     private static  String postUrl;
+    private static String jenkinsToken;
 
 
     public static void init() {
@@ -34,6 +39,8 @@ public class GitHubManager {
         postUrl = prop.getProperty(POST_URL_PROP);
         repositoryOwner = prop.getProperty(REPO_OWNER_PROP);
         repositoryName = prop.getProperty(REPO_NAME_PROP);
+        jenkinsToken = prop.getProperty("jenkinsToken");
+
     }
 
     public static String getPullRequests() {
@@ -62,6 +69,25 @@ public class GitHubManager {
         System.out.println(response.getStatusCode());
     }
 
+    public static void sendToJenkins(String data) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+      //  headers.set("Authorization", "Bearer "+ accessToken);
+
+        //String requestURL = "http://localhost:8081/job/GitHubApiProject/buildWithParameters";
+        //{"parameter": [{"name":"id", "value":"123"}, {"name":"verbosity", "value":"high"}]}
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<String, String>();
+        //Map<String,Object> body=new HashMap<String,Object>();
+        body.add("user",jenkinsToken);
+        body.add("data","something");
+        HttpEntity<MultiValueMap<String, String>> requestEntity=
+                new HttpEntity<MultiValueMap<String, String>>(body, headers);
+      //  HttpEntity<Map> entity = new HttpEntity<Map>(body, headers);
+        ResponseEntity<String> response = restTemplate.exchange(postUrl, HttpMethod.POST,requestEntity,String.class);
+        System.out.println(response.getStatusCode());
+    }
+
     public static void main(String[] args) {
 
         init();
@@ -72,9 +98,12 @@ public class GitHubManager {
             e.printStackTrace();
         }
         //create webhook
-        createWebHook();
-
-
+        //createWebHook();
+        try {
+             sendToJenkins(JsonPullRequestParser.parsePullRequestList(getPullRequests()).toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
