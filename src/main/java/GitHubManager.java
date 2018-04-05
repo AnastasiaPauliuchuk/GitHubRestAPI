@@ -1,50 +1,81 @@
+import model.JsonPullRequestParser;
+import model.PullRequest;
+import model.WebHook;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 import utils.PropertiesResourceManager;
 
+import java.io.IOException;
+
+
 public class GitHubManager {
 
     private static final String SETTINGS_FILE = "settings.properties";
-    private static final String RESOURCE_URL = "https://api.github.com/graphql";
-    private static final String[] HOOKS_EVENTS = {"push","pull request"};
+
+    private static final String AUTH_TOKEN_PROP = "authToken";
+    private static final String REPO_OWNER_PROP = "repositoryOwner";
+    private static final String REPO_NAME_PROP = "repositoryName";
+    private static final String POST_URL_PROP = "postUrl";
+
+    private static final String GRAPHQL_RESOURCE_URL = "https://api.github.com/graphql";
+
+    private static final String API_GITHUB_HOOKS_URL_TEMPLATE ="https://api.github.com/repos/%1$s/%2$s/hooks";
+
+
     private static  String accessToken;
+    private static  String repositoryOwner;
+    private static  String repositoryName;
+    private static  String postUrl;
+
+
     public static void init() {
         PropertiesResourceManager prop = new PropertiesResourceManager(SETTINGS_FILE);
-        accessToken = prop.getProperty("authToken");
+        accessToken = prop.getProperty(AUTH_TOKEN_PROP);
+        postUrl = prop.getProperty(POST_URL_PROP);
+        repositoryOwner = prop.getProperty(REPO_OWNER_PROP);
+        repositoryName = prop.getProperty(REPO_NAME_PROP);
     }
+
     public static String getPullRequests() {
 
-        init();
-        RestTemplate restTemplate = new RestTemplate();
 
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer "+ accessToken);
+        String requestJson = String.format(PullRequest.getGraphqlString(),repositoryOwner, repositoryName);
+        HttpEntity<String> entity = new HttpEntity<String>(requestJson, headers);
+        ResponseEntity<String> response = restTemplate.exchange(GRAPHQL_RESOURCE_URL, HttpMethod.POST,entity,String.class);
+        return response.getBody();
+    }
+
+    public static void createWebHook() {
+        RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer "+ accessToken);
 
-        String requestJson = "{\"query\":\"query {   repository(owner: \\\"AnastasiaPauliuchuk\\\", name: \\\"GitTestAPI\\\") {     pullRequests(last: 10) {       edges {         node {           number           author {             login           }           merged           baseRefName         }       }     } } }\",\"variables\":\"{}\"}";
+        String requestURL = String.format(API_GITHUB_HOOKS_URL_TEMPLATE,repositoryOwner, repositoryName);
+        String requestJson = String.format(WebHook.getCreateJsonTemplate(),"web","\"pull_request\",\"push\"",postUrl);
         HttpEntity<String> entity = new HttpEntity<String>(requestJson, headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(RESOURCE_URL, HttpMethod.POST,entity,String.class);
-
+        ResponseEntity<String> response = restTemplate.exchange(requestURL, HttpMethod.POST,entity,String.class);
         System.out.println(response.getStatusCode());
-        System.out.println(response.toString());
-        System.out.println(response.getBody());
-
-        GitHubResponse request = new GitHubResponse();
-        HttpEntity<GitHubResponse> httpRequest = new HttpEntity<GitHubResponse>(request, headers);
-
-        GitHubResponse result = restTemplate.postForObject(RESOURCE_URL, entity, GitHubResponse.class);
-        System.out.println(result.data);
-
-        return "";
-    }
-
-    public static void createWebHooks() {
-
     }
 
     public static void main(String[] args) {
-        getPullRequests();
+
+        init();
+        //get pull requests
+        try {
+            System.out.println(JsonPullRequestParser.parsePullRequestList(getPullRequests()).toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //create webhook
+        createWebHook();
+
+
+
     }
 
 }
