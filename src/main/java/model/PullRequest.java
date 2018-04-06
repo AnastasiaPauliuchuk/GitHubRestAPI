@@ -59,13 +59,13 @@ public class PullRequest {
 
     @Override
     public String toString() {
-        return "\nPullRequest{" +
-                "\nrepoURL='" + repoURL + '\'' +
-                ", \nnumber=" + number +
-                ", \nauthorLogin='" + authorLogin + '\'' +
-                ", \nheadRefName='" + headRefName + '\'' +
-                ", \nbaseRefName='" + baseRefName + '\'' +
-                "\n}";
+        return "{PullRequest:" +
+                "repoURL='" + repoURL + '\'' +
+                ",number=" + number +
+                ",authorLogin='" + authorLogin + '\'' +
+                ",headRefName='" + headRefName + '\'' +
+                ",baseRefName='" + baseRefName + '\'' +
+                "}";
     }
 }
 

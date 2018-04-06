@@ -8,11 +8,11 @@ import org.springframework.web.client.RestTemplate;
 import utils.PropertiesResourceManager;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Date;
+import java.util.TimerTask;
 
 
-public class GitHubManager {
+public class GitHubManager extends TimerTask {
 
     private static final String SETTINGS_FILE = "settings.properties";
 
@@ -33,7 +33,7 @@ public class GitHubManager {
     private static String jenkinsToken;
 
 
-    public static void init() {
+    private static void init() {
         PropertiesResourceManager prop = new PropertiesResourceManager(SETTINGS_FILE);
         accessToken = prop.getProperty(AUTH_TOKEN_PROP);
         postUrl = prop.getProperty(POST_URL_PROP);
@@ -56,7 +56,7 @@ public class GitHubManager {
         return response.getBody();
     }
 
-    public static void createWebHook() {
+    /*public static void createWebHook() {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -68,43 +68,30 @@ public class GitHubManager {
         ResponseEntity<String> response = restTemplate.exchange(requestURL, HttpMethod.POST,entity,String.class);
         System.out.println(response.getStatusCode());
     }
-
+*/
     public static void sendToJenkins(String data) {
+        System.out.println(data);
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-      //  headers.set("Authorization", "Bearer "+ accessToken);
 
-        //String requestURL = "http://localhost:8081/job/GitHubApiProject/buildWithParameters";
-        //{"parameter": [{"name":"id", "value":"123"}, {"name":"verbosity", "value":"high"}]}
         MultiValueMap<String, String> body = new LinkedMultiValueMap<String, String>();
-        //Map<String,Object> body=new HashMap<String,Object>();
         body.add("user",jenkinsToken);
-        body.add("data","something");
+        body.add("data",data);
         HttpEntity<MultiValueMap<String, String>> requestEntity=
-                new HttpEntity<MultiValueMap<String, String>>(body, headers);
-      //  HttpEntity<Map> entity = new HttpEntity<Map>(body, headers);
-        ResponseEntity<String> response = restTemplate.exchange(postUrl, HttpMethod.POST,requestEntity,String.class);
-        System.out.println(response.getStatusCode());
+                new HttpEntity<>(body, headers);
+        restTemplate.postForLocation(postUrl,requestEntity);
     }
 
-    public static void main(String[] args) {
 
+
+    @Override
+    public void run() {
         init();
-        //get pull requests
         try {
-            System.out.println(JsonPullRequestParser.parsePullRequestList(getPullRequests()).toString());
+            sendToJenkins(JsonPullRequestParser.parsePullRequestList(getPullRequests()).toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //create webhook
-        //createWebHook();
-        try {
-             sendToJenkins(JsonPullRequestParser.parsePullRequestList(getPullRequests()).toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
-
 }
