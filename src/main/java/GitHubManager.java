@@ -1,15 +1,17 @@
 import model.JsonPullRequestParser;
 import model.PullRequest;
-import model.WebHook;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import utils.PropertiesResourceManager;
 
+import java.awt.*;
 import java.io.IOException;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 
 public class GitHubManager extends TimerTask {
@@ -23,7 +25,6 @@ public class GitHubManager extends TimerTask {
 
     private static final String GRAPHQL_RESOURCE_URL = "https://api.github.com/graphql";
 
-    private static final String API_GITHUB_HOOKS_URL_TEMPLATE ="https://api.github.com/repos/%1$s/%2$s/hooks";
 
 
     private static  String accessToken;
@@ -32,6 +33,7 @@ public class GitHubManager extends TimerTask {
     private static  String postUrl;
     private static String jenkinsToken;
 
+    private static ArrayList<PullRequest> pullRequests = null;
 
     private static void init() {
         PropertiesResourceManager prop = new PropertiesResourceManager(SETTINGS_FILE);
@@ -43,8 +45,7 @@ public class GitHubManager extends TimerTask {
 
     }
 
-    public static String getPullRequests() {
-
+    private static  ArrayList<PullRequest> queryPullRequests() {
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -53,22 +54,31 @@ public class GitHubManager extends TimerTask {
         String requestJson = String.format(PullRequest.getGraphqlString(),repositoryOwner, repositoryName);
         HttpEntity<String> entity = new HttpEntity<String>(requestJson, headers);
         ResponseEntity<String> response = restTemplate.exchange(GRAPHQL_RESOURCE_URL, HttpMethod.POST,entity,String.class);
-        return response.getBody();
+        try {
+            return JsonPullRequestParser.parsePullRequestList(response.getBody());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new  ArrayList<PullRequest>();
+        }
     }
 
-    /*public static void createWebHook() {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer "+ accessToken);
-
-        String requestURL = String.format(API_GITHUB_HOOKS_URL_TEMPLATE,repositoryOwner, repositoryName);
-        String requestJson = String.format(WebHook.getCreateJsonTemplate(),"web","\"pull_request\",\"push\"",postUrl);
-        HttpEntity<String> entity = new HttpEntity<String>(requestJson, headers);
-        ResponseEntity<String> response = restTemplate.exchange(requestURL, HttpMethod.POST,entity,String.class);
-        System.out.println(response.getStatusCode());
+    private static boolean findByNumber(List<PullRequest> prevList, PullRequest element) {
+        return prevList.stream().anyMatch(item -> item.getNumber().equals(element.getNumber()) && element.getLastCommitId().equals(item.getLastCommitId()));
     }
-*/
+
+
+    public static List<PullRequest> filterUpdatedPullRequests(ArrayList<PullRequest> currentPullrequests, ArrayList<PullRequest> prevPullRequests) {
+
+        if(prevPullRequests==null || prevPullRequests.size()==0) {
+            return currentPullrequests;
+        }
+        else {
+            return currentPullrequests.stream().filter(item -> !findByNumber(prevPullRequests, item)).collect(Collectors.toList());
+        }
+
+    }
+
+
     public static void sendToJenkins(String data) {
         System.out.println(data);
         RestTemplate restTemplate = new RestTemplate();
@@ -88,10 +98,19 @@ public class GitHubManager extends TimerTask {
     @Override
     public void run() {
         init();
-        try {
-            sendToJenkins(JsonPullRequestParser.parsePullRequestList(getPullRequests()).toString());
-        } catch (IOException e) {
-            e.printStackTrace();
+        //System.out.println(pullRequests);
+        System.out.println("run");
+        ArrayList<PullRequest> newPullRequests = queryPullRequests();
+        System.out.println("There are "+ newPullRequests.size() + " open pull request (s)");
+
+        ArrayList<PullRequest>resultPullRequests = (ArrayList<PullRequest>) filterUpdatedPullRequests(newPullRequests,pullRequests);
+        System.out.println("There are  "+ resultPullRequests.size() + " updated open pull request (s)");
+        if(resultPullRequests.size() > 0 ) {
+            System.out.print(resultPullRequests.toString());
+            sendToJenkins(resultPullRequests.toString());
         }
+
+        pullRequests = newPullRequests;
+
     }
 }
