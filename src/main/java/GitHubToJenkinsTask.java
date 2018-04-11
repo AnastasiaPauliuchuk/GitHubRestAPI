@@ -2,7 +2,6 @@ import model.PullRequest;
 import model.PullRequestsData;
 import model.PullRequestsDataManager;
 
-import java.util.ArrayList;
 import java.util.TimerTask;
 
 public class GitHubToJenkinsTask extends TimerTask {

@@ -15,11 +15,11 @@ public class JsonPullRequestDataParser {
         PullRequest pullRequest = new PullRequest() ;
 
         pullRequest.setNumber(node.get("number").asInt());
+        pullRequest.setId(node.get("id").textValue());
         pullRequest.setHeadRefName(node.get("headRef").get("name").textValue());
         pullRequest.setBaseRefName(node.get("baseRefName").textValue());
         pullRequest.setAuthorLogin(node.get("author").get("login").textValue());
         pullRequest.setRepoURL(node.get("repository").get("url").textValue());
-        //pullRequest.setLastCommitId(node.get("headRef").get("target").get("id").textValue());
         return pullRequest;
     }
     private static ReportedUpdate parsePullRequestUpdate(PullRequest pullRequest, JsonNode node) {

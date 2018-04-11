@@ -1,6 +1,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PullRequestsData {
 
@@ -31,4 +32,16 @@ public class PullRequestsData {
     public void setReportedUpdates(ArrayList<ReportedUpdate> reportedUpdates) {
         this.reportedUpdates = reportedUpdates;
     }
+
+    public PullRequest getPullRequestById(String id) {
+        List<PullRequest> pullRequests = this.getPullRequests();
+        for(PullRequest item:pullRequests) {
+            if(item.getId().equals(id))
+                return item;
+        }
+        return null;
+    }
+
 }
+
+

@@ -94,7 +94,7 @@ public class PullRequestsDataManager  {
         else {
             PullRequestsData data = new PullRequestsData();
             List <ReportedUpdate> reportedUpdates =
-            currentPullRequestsData.getReportedUpdates().stream().filter(item ->findReportedUpdate(pullRequestsData.getReportedUpdates(),item)).collect(Collectors.toList());
+            currentPullRequestsData.getReportedUpdates().stream().filter(item ->!findReportedUpdate(pullRequestsData.getReportedUpdates(),item)).collect(Collectors.toList());
             List <PullRequest> pullRequests =
             currentPullRequestsData.getPullRequests().stream().filter(item -> findPullRequestByUpdates(currentPullRequestsData.getReportedUpdates(), item)).collect(Collectors.toList());
             data.setPullRequests((ArrayList<PullRequest>)pullRequests);
@@ -113,10 +113,11 @@ public class PullRequestsDataManager  {
     }
 
     private static boolean findReportedUpdate(List<ReportedUpdate> reportedUpdates, ReportedUpdate element) {
-        return reportedUpdates.stream().allMatch(item->item.getPullRequest().equals(element.getPullRequest())
+      /*  return reportedUpdates.stream().allMatch(item->item.getPullRequest().equals(element.getPullRequest())
                 &&item.getCommitID().equals(element.getCommitID())
                 &&!item.isReported());
-
+*/
+      return reportedUpdates.contains(element);
     }
 
     public static boolean findPullRequestByNumber(List<PullRequest> prevList, PullRequest element) {
