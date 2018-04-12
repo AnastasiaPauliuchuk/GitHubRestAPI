@@ -20,6 +20,7 @@ public class JsonPullRequestDataParser {
         pullRequest.setBaseRefName(node.get("baseRefName").textValue());
         pullRequest.setAuthorLogin(node.get("author").get("login").textValue());
         pullRequest.setRepoURL(node.get("repository").get("url").textValue());
+        pullRequest.setIsOpen(true);
         return pullRequest;
     }
     private static ReportedUpdate parsePullRequestUpdate(PullRequest pullRequest, JsonNode node) {

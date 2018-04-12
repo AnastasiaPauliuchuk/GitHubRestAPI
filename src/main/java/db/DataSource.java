@@ -9,6 +9,12 @@ public class DataSource {
     private String login;
     private String password;
 
+    public DataSource(String url, String login, String password) {
+        this.url = url;
+        this.login = login;
+        this.password = password;
+    }
+
     public void setUrl(String url) {
         this.url = url;
     }

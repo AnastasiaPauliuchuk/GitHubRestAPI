@@ -91,13 +91,13 @@ public class PullRequest {
     @Override
     public String toString() {
         return "PullRequest{" +
-                "id='" + id + '\'' +
-                ", number=" + number +
-                ", repoURL='" + repoURL + '\'' +
-                ", authorLogin='" + authorLogin + '\'' +
-                ", headRefName='" + headRefName + '\'' +
-                ", baseRefName='" + baseRefName + '\'' +
-                ", isOpen=" + isOpen +
+                "\nid='" + id + '\'' +
+                ", \nnumber=" + number +
+                ", \nrepoURL='" + repoURL + '\'' +
+                ", \nauthorLogin='" + authorLogin + '\'' +
+                ", \nheadRefName='" + headRefName + '\'' +
+                ", \nbaseRefName='" + baseRefName + '\'' +
+                ", \nisOpen=" + isOpen +
                 '}';
     }
 

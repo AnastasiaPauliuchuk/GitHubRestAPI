@@ -3,7 +3,6 @@ package dao.impl;
 import dao.PullRequestDao;
 import dao.ReportedUpdateDao;
 import db.DataSource;
-import model.PullRequest;
 import model.ReportedUpdate;
 
 import java.sql.Connection;
@@ -17,6 +16,18 @@ public class ReportedUpdatesDaoImpl implements ReportedUpdateDao {
 
     private DataSource dataSource;
 
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    public ReportedUpdatesDaoImpl(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
     public List<ReportedUpdate> findAll() {
         List<ReportedUpdate> result = new ArrayList<ReportedUpdate>();
         Connection connection = null;
@@ -28,7 +39,39 @@ public class ReportedUpdatesDaoImpl implements ReportedUpdateDao {
             while (rs.next()) {
                 ReportedUpdate item = new ReportedUpdate();
 
-                PullRequestDao pullRequestDao = new PullRequestDaoImpl();
+                PullRequestDao pullRequestDao = new PullRequestDaoImpl(this.getDataSource());
+                item.setPullRequest(pullRequestDao.findById(rs.getString(ReportedUpdate.PULLREQUEST_COLUMN)));
+
+                item.setReported(rs.getBoolean(ReportedUpdate.ISREPORTED_COLUMN));
+                item.setCommitID(rs.getString(ReportedUpdate.COMMIT_COLUMN));
+
+                result.add(item);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        }
+        return result;
+    }
+    @Override
+    public List<ReportedUpdate> findAllNotReported() {
+        List<ReportedUpdate> result = new ArrayList<ReportedUpdate>();
+        Connection connection = null;
+        try {
+            connection = dataSource.getConnection();
+            PreparedStatement statement = connection.prepareStatement(SQL_FIND_ALL_NOT_REPORTED);
+            ResultSet rs = statement.executeQuery();
+
+            while (rs.next()) {
+                ReportedUpdate item = new ReportedUpdate();
+
+                PullRequestDao pullRequestDao = new PullRequestDaoImpl(this.getDataSource());
                 item.setPullRequest(pullRequestDao.findById(rs.getString(ReportedUpdate.PULLREQUEST_COLUMN)));
 
                 item.setReported(rs.getBoolean(ReportedUpdate.ISREPORTED_COLUMN));
@@ -49,6 +92,24 @@ public class ReportedUpdatesDaoImpl implements ReportedUpdateDao {
         return result;
     }
 
+    @Override
+    public void updateAllClose() {
+        Connection connection = null;
+        try {
+            connection = dataSource.getConnection();
+            PreparedStatement statement = connection.prepareStatement(SQL_UPDATE_ALL_REPORTED);
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public ReportedUpdate findByPullRequestId(Long id) {
         ReportedUpdate item = null;
         Connection connection = null;
@@ -60,7 +121,38 @@ public class ReportedUpdatesDaoImpl implements ReportedUpdateDao {
             while (rs.next()) {
                 item = new ReportedUpdate();
 
-                PullRequestDao pullRequestDao = new PullRequestDaoImpl();
+                PullRequestDao pullRequestDao = new PullRequestDaoImpl(this.getDataSource());
+                item.setPullRequest(pullRequestDao.findById(rs.getString(ReportedUpdate.PULLREQUEST_COLUMN)));
+
+                item.setReported(rs.getBoolean(ReportedUpdate.ISREPORTED_COLUMN));
+                item.setCommitID(rs.getString(ReportedUpdate.COMMIT_COLUMN));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return item;
+    }
+
+    @Override
+    public ReportedUpdate findByCompositeKey(String pullRequestId, String commitId) {
+        ReportedUpdate item = null;
+        Connection connection = null;
+        try {
+            connection = dataSource.getConnection();
+            PreparedStatement statement = connection.prepareStatement(SQL_FIND_BY_PULLREQUEST_AND_COMMIT);
+            statement.setString(1, pullRequestId);
+            statement.setString(2, commitId);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                item = new ReportedUpdate();
+
+                PullRequestDao pullRequestDao = new PullRequestDaoImpl(this.getDataSource());
                 item.setPullRequest(pullRequestDao.findById(rs.getString(ReportedUpdate.PULLREQUEST_COLUMN)));
 
                 item.setReported(rs.getBoolean(ReportedUpdate.ISREPORTED_COLUMN));
@@ -79,7 +171,6 @@ public class ReportedUpdatesDaoImpl implements ReportedUpdateDao {
     }
 
 
-
     public void insert(ReportedUpdate item) {
         Connection connection = null;
         try {
@@ -89,7 +180,7 @@ public class ReportedUpdatesDaoImpl implements ReportedUpdateDao {
 
             statement.setString(1, item.getPullRequest().getId());
             statement.setString(2, item.getCommitID());
-            statement.setBoolean(3,item.isReported());
+            statement.setInt(3, (item.isReported()) ? 1 : 0 );
 
             statement.execute();
 
@@ -116,7 +207,7 @@ public class ReportedUpdatesDaoImpl implements ReportedUpdateDao {
 
             statement.setString(3, item.getPullRequest().getId());
             statement.setString(1, item.getCommitID());
-            statement.setBoolean(2,item.isReported());
+            statement.setInt(2,item.isReported()? 1 : 0);
             statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -146,4 +237,6 @@ public class ReportedUpdatesDaoImpl implements ReportedUpdateDao {
             }
         }
     }
+
+
 }

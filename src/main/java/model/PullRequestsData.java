@@ -5,10 +5,10 @@ import java.util.List;
 
 public class PullRequestsData {
 
-    private ArrayList<PullRequest> pullRequests;
-    private ArrayList<ReportedUpdate> reportedUpdates;
+    private List<PullRequest> pullRequests;
+    private List<ReportedUpdate> reportedUpdates;
 
-    public PullRequestsData(ArrayList<PullRequest> pullRequests, ArrayList<ReportedUpdate> reportedUpdates) {
+    public PullRequestsData(List<PullRequest> pullRequests, List<ReportedUpdate> reportedUpdates) {
         this.pullRequests = pullRequests;
         this.reportedUpdates = reportedUpdates;
     }
@@ -17,19 +17,19 @@ public class PullRequestsData {
 
     }
 
-    public ArrayList<PullRequest> getPullRequests() {
+    public List<PullRequest> getPullRequests() {
         return pullRequests;
     }
 
-    public void setPullRequests(ArrayList<PullRequest> pullRequests) {
+    public void setPullRequests(List<PullRequest> pullRequests) {
         this.pullRequests = pullRequests;
     }
 
-    public ArrayList<ReportedUpdate> getReportedUpdates() {
+    public List<ReportedUpdate> getReportedUpdates() {
         return reportedUpdates;
     }
 
-    public void setReportedUpdates(ArrayList<ReportedUpdate> reportedUpdates) {
+    public void setReportedUpdates(List<ReportedUpdate> reportedUpdates) {
         this.reportedUpdates = reportedUpdates;
     }
 

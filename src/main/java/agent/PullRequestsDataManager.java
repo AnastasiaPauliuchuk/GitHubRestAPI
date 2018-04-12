@@ -1,6 +1,9 @@
-package model;
+package agent;
 
 import json.JsonPullRequestDataParser;
+import model.PullRequest;
+import model.PullRequestsData;
+import model.ReportedUpdate;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -10,7 +13,6 @@ import properties.PropertiesResourceManager;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TimerTask;
 import java.util.stream.Collectors;
 
 
@@ -36,21 +38,25 @@ public class PullRequestsDataManager  {
    // private static ArrayList<PullRequest> pullRequests = null;
     private static PullRequestsData pullRequestsData = null;
 
-    public static PullRequestsData getPullRequestsData() {
-        return pullRequestsData;
-    }
-
-    public static void setPullRequestsData(PullRequestsData pullRequestsData) {
-        PullRequestsDataManager.pullRequestsData = pullRequestsData;
-    }
-
-    public static void init() {
+    public PullRequestsDataManager(String settingsFile) {
         PropertiesResourceManager prop = new PropertiesResourceManager(SETTINGS_FILE);
         accessToken = prop.getProperty(AUTH_TOKEN_PROP);
         postUrl = prop.getProperty(POST_URL_PROP);
         repositoryOwner = prop.getProperty(REPO_OWNER_PROP);
         repositoryName = prop.getProperty(REPO_NAME_PROP);
         jenkinsToken = prop.getProperty("jenkinsToken");
+    }
+
+    public static PullRequestsData getPullRequestsData() {
+        return pullRequestsData;
+    }
+
+    public static void setPullRequestsData(PullRequestsData prData) {
+        pullRequestsData = prData;
+    }
+
+    public static void init() {
+
 
     }
 
@@ -94,9 +100,10 @@ public class PullRequestsDataManager  {
         else {
             PullRequestsData data = new PullRequestsData();
             List <ReportedUpdate> reportedUpdates =
-            currentPullRequestsData.getReportedUpdates().stream().filter(item ->!findReportedUpdate(pullRequestsData.getReportedUpdates(),item)).collect(Collectors.toList());
+            currentPullRequestsData.getReportedUpdates().stream().filter(item ->!findReportedUpdate(prevPullRequestsData.getReportedUpdates(),item)).collect(Collectors.toList());
+              //      currentPullRequestsData.getReportedUpdates().stream().filter(item ->false).collect(Collectors.toList());
             List <PullRequest> pullRequests =
-            currentPullRequestsData.getPullRequests().stream().filter(item -> findPullRequestByUpdates(currentPullRequestsData.getReportedUpdates(), item)).collect(Collectors.toList());
+            currentPullRequestsData.getPullRequests().stream().filter(item -> findPullRequestByUpdates(reportedUpdates, item)).collect(Collectors.toList());
             data.setPullRequests((ArrayList<PullRequest>)pullRequests);
             data.setReportedUpdates((ArrayList<ReportedUpdate> )reportedUpdates);
 
@@ -108,26 +115,19 @@ public class PullRequestsDataManager  {
 
     }
 
-    private static boolean findPullRequestByUpdates(ArrayList<ReportedUpdate> reportedUpdates, PullRequest pullRequest) {
+    private static boolean findPullRequestByUpdates(List<ReportedUpdate> reportedUpdates, PullRequest pullRequest) {
         return reportedUpdates.stream().anyMatch(item->item.getPullRequest().equals(pullRequest));
     }
 
     private static boolean findReportedUpdate(List<ReportedUpdate> reportedUpdates, ReportedUpdate element) {
-      /*  return reportedUpdates.stream().allMatch(item->item.getPullRequest().equals(element.getPullRequest())
-                &&item.getCommitID().equals(element.getCommitID())
-                &&!item.isReported());
-*/
-      return reportedUpdates.contains(element);
+        return reportedUpdates.stream().anyMatch(item->item.getPullRequest().equals(element.getPullRequest())
+                && item.getCommitID().equals(element.getCommitID()));
+
+
+      //return reportedUpdates.contains(element));
+      //||(element.isReported());
     }
 
-    public static boolean findPullRequestByNumber(List<PullRequest> prevList, PullRequest element) {
-        return prevList.stream().anyMatch(item -> item.getNumber().equals(element.getNumber()));
-    }
-
-    public static boolean findByNumber(PullRequestsData pullRequestsData, PullRequest pullRequest, ReportedUpdate reportedUpdate) {
-        return  (pullRequestsData.getPullRequests().stream().anyMatch(item -> item.getNumber().equals(pullRequest.getNumber()))||
-                pullRequestsData.getReportedUpdates().stream().anyMatch(item->reportedUpdate.getCommitID().equals(item.getCommitID())));
-    }
 
     public static void sendToJenkins(String data) {
         System.out.println(data);
@@ -145,25 +145,4 @@ public class PullRequestsDataManager  {
 
 
 
-
-    public static void run() {
-        init();
-        //System.out.println(pullRequests);
-        System.out.println("run");
-        PullRequestsData newPullRequestData = queryPullRequests();
-        System.out.println("There are "+ newPullRequestData.getPullRequests().size() + " open pull request (s)");
-
-       // ArrayList<PullRequest>resultPullRequests = (ArrayList<PullRequest>) filterUpdatedPullRequests(newPullRequestData.getPullRequests(),pullRequestsData.getPullRequests());
-        PullRequestsData resultData = filterUpdatedPullRequests(newPullRequestData,pullRequestsData);
-        System.out.println("There are  "+ resultData.getReportedUpdates().size() + " updated open pull request (s)");
-        if(resultData.getReportedUpdates().size() > 0 ) {
-            System.out.print(resultData.getReportedUpdates().toString());
-          //  sendToJenkins(resultData.getReportedUpdates().toString());
-            //update in DB
-        }
-
-        pullRequestsData= new PullRequestsData(newPullRequestData.getPullRequests(),newPullRequestData.getReportedUpdates());
-      //  pullRequestsData.setPullRequests(newPullRequestData.getPullRequests());
-
-    }
 }

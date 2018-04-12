@@ -12,6 +12,18 @@ public class PullRequestDaoImpl implements PullRequestDao {
 
     private DataSource dataSource;
 
+    public PullRequestDaoImpl(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
     public List<PullRequest> findAll() {
         List<PullRequest> result = new ArrayList<PullRequest>();
         Connection connection = null;
@@ -84,8 +96,8 @@ public class PullRequestDaoImpl implements PullRequestDao {
             statement.setString(3,item.getRepoURL());
             statement.setString(4,item.getAuthorLogin());
             statement.setString(5,item.getBaseRefName());
-            statement.setBoolean(6,item.getIsOpen());
-            statement.setString(7,item.getHeadRefName());
+            statement.setInt(7, (item.getIsOpen()) ? 1 : 0);
+            statement.setString(6,item.getHeadRefName());
             statement.execute();
 
             //ResultSet generatedkeys = statement.executeQuery();
@@ -114,7 +126,7 @@ public class PullRequestDaoImpl implements PullRequestDao {
             statement.setString(3,item.getAuthorLogin());
             statement.setString(4,item.getBaseRefName());
             statement.setString(5,item.getHeadRefName());
-            statement.setBoolean(6, item.getIsOpen());
+            statement.setInt(6, (item.getIsOpen()) ? 1 : 0);
             statement.setString(7, item.getId());
             statement.execute();
         } catch (SQLException e) {
@@ -134,6 +146,55 @@ public class PullRequestDaoImpl implements PullRequestDao {
             connection = dataSource.getConnection();
             PreparedStatement statement = connection.prepareStatement(SQL_DELETE);
             statement.setString(1, item.getId());
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public List<PullRequest> findAllOpen() {
+        List<PullRequest> result = new ArrayList<PullRequest>();
+        Connection connection = null;
+        try {
+            connection = dataSource.getConnection();
+            PreparedStatement statement = connection.prepareStatement(SQL_FIND_ALL_OPEN);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                PullRequest item = new PullRequest();
+                item.setId(rs.getString(PullRequest.ID_COLUMN));
+                item.setNumber(rs.getInt(PullRequest.NUMBER_COLUMN));
+                item.setRepoURL(rs.getString(PullRequest.REPO_COLUMN));
+                item.setBaseRefName(rs.getString(PullRequest.BASE_COLUMN));
+                item.setHeadRefName(rs.getString(PullRequest.HEAD_COLUMN));
+                item.setAuthorLogin(rs.getString(PullRequest.AUTHOR_COLUMN));
+                item.setIsOpen(rs.getBoolean(PullRequest.IS_OPEN_COLUMN));
+                result.add(item);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void updateAllClose() {
+        Connection connection = null;
+        try {
+            connection = dataSource.getConnection();
+            PreparedStatement statement = connection.prepareStatement(SQL_UPDATE_ALL_CLOSE);
             statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
