@@ -15,36 +15,42 @@ public class DbPullRequestDataManager {
     private static PullRequestDao pullRequestDao;
     private static ReportedUpdateDao reportedUpdateDao;
 
+    private static DataSource dataSource;
 
-    public static PullRequestsData readPullRequestsDataFromDB(DataSource dataSource) {
+    public DbPullRequestDataManager(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    public  PullRequestsData readPullRequestsDataFromDB() {
         pullRequestDao = new PullRequestDaoImpl(dataSource);
         reportedUpdateDao = new ReportedUpdatesDaoImpl(dataSource);
         List<PullRequest> pullRequests = pullRequestDao.findAllOpen();
-        List<ReportedUpdate> reportedUpdates = reportedUpdateDao.findAllNotReported();
-        return new PullRequestsData(pullRequests,reportedUpdates);
+        List<ReportedUpdate> reportedUpdates = reportedUpdateDao.findAll();
+        return new PullRequestsData(pullRequests, reportedUpdates);
     }
 
-    public static void writePullRequestsDataToDB(PullRequestsData pullRequestsData, DataSource dataSource) {
+    public  void writePullRequestsDataToDB(PullRequestsData pullRequestsData) {
         pullRequestDao = new PullRequestDaoImpl(dataSource);
         reportedUpdateDao = new ReportedUpdatesDaoImpl(dataSource);
-        pullRequestDao.updateAllClose();
+
         List<PullRequest> pullRequests = pullRequestsData.getPullRequests();
-        for(PullRequest item:pullRequests) {
-            //if item exists - > update
-            if(pullRequestDao.findById(item.getId())!=null) {
+        for (PullRequest item : pullRequests) {
+            if (pullRequestDao.findById(item.getId()) != null) {
                 pullRequestDao.update(item);
-            }
-            else {
+            } else {
                 pullRequestDao.insert(item);
             }
         }
-        List<ReportedUpdate> reportedUpdates = pullRequestsData.getReportedUpdates();
-        for(ReportedUpdate item:reportedUpdates) {
+        List<PullRequest> pullRequestsToArchive = pullRequestsData.getPullRequestsToArchive();
 
-            if(reportedUpdateDao.findByCompositeKey(item.getPullRequest().getId(),item.getCommitID())!=null) {
+        if(pullRequestsToArchive!=null) pullRequestsToArchive.stream().forEach(item -> pullRequestDao.update(item));
+
+        List<ReportedUpdate> reportedUpdates = pullRequestsData.getReportedUpdates();
+        for (ReportedUpdate item : reportedUpdates) {
+
+            if (reportedUpdateDao.findByCompositeKey(item.getPullRequest().getId(), item.getCommitID()) != null) {
                 reportedUpdateDao.update(item);
-            }
-            else {
+            } else {
                 reportedUpdateDao.insert(item);
             }
 
@@ -56,10 +62,11 @@ public class DbPullRequestDataManager {
 
     }
 
-    public static void writeReportUpdatesClosed(DataSource dataSource) {
+    public static void writeReportUpdatesClosed() {
         reportedUpdateDao = new ReportedUpdatesDaoImpl(dataSource);
         reportedUpdateDao.updateAllClose();
     }
+
 
 }
 

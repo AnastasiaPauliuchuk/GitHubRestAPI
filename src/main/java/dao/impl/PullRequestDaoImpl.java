@@ -189,21 +189,4 @@ public class PullRequestDaoImpl implements PullRequestDao {
         return result;
     }
 
-    @Override
-    public void updateAllClose() {
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SQL_UPDATE_ALL_CLOSE);
-            statement.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 }

@@ -1,5 +1,6 @@
 package agent;
 
+import db.DbPullRequestDataManager;
 import model.PullRequestsData;
 
 import java.util.TimerTask;
@@ -10,6 +11,8 @@ public class GitHubToJenkinsTask extends TimerTask {
     private static  PullRequestsDataManager pullRequestsDataManager;
 
     private static PullRequestsData pullRequestsData;
+    private static DbPullRequestDataManager dbManager;
+    private static JenkinsManager jenkinsManager;
 
     public static PullRequestsDataManager getPullRequestsDataManager() {
         return pullRequestsDataManager;
@@ -49,20 +52,38 @@ public class GitHubToJenkinsTask extends TimerTask {
 
         PullRequestsData resultData = pullRequestsDataManager.filterUpdatedPullRequests(newPullRequestData,pullRequestsData);
 
-        System.out.println("\nThere are  "+ resultData.getReportedUpdates().size() + " updated open pull request (s)");
+        System.out.print("\n-----------------data ro report -----------------\n");
+        System.out.println("\nThere are  "+ resultData.getPullRequests().size() + " updated open pull request (s)");
         if(resultData.getReportedUpdates().size() > 0 ) {
             System.out.println("\nThere are "+ resultData.getReportedUpdates().size() + " new open updates");
             System.out.print(resultData.getReportedUpdates().toString());
 
-            //  sendToJenkins(resultData.getReportedUpdates().toString());
 
+            //  sendToJenkins(resultData.getReportedUpdates().toString());
+            resultData.getReportedUpdates().stream().forEach(item ->jenkinsManager.postData(item));
+        //    jenkinsManager.postData(resultData.getReportedUpdates());
             //update in DB
 
         }
+        pullRequestsDataManager.markReported(newPullRequestData.getReportedUpdates());
+        if(resultData.getPullRequestsToArchive()!=null) {
+            System.out.println("\nThere are "+ resultData.getPullRequestsToArchive().size() + " closed request (s)");
+            System.out.print(resultData.getPullRequestsToArchive().toString());
+        }
 
-        pullRequestsData = new PullRequestsData(newPullRequestData.getPullRequests(),newPullRequestData.getReportedUpdates());
+        pullRequestsData = new PullRequestsData(newPullRequestData.getPullRequests(),newPullRequestData.getReportedUpdates(),resultData.getPullRequestsToArchive());
+        System.out.print("\n-----------------new initial data  -----------------\n");
+        System.out.print(pullRequestsData.getReportedUpdates().toString());
+
+        dbManager.writePullRequestsDataToDB(pullRequestsData);
     }
 
 
+    public void setDbManager(DbPullRequestDataManager dbManager) {
+        this.dbManager = dbManager;
+    }
 
+    public  void setJenkinsManager(JenkinsManager jenkinsManager) {
+        this.jenkinsManager = jenkinsManager;
+    }
 }

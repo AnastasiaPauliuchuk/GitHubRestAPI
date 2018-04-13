@@ -99,13 +99,18 @@ public class PullRequestsDataManager  {
         }
         else {
             PullRequestsData data = new PullRequestsData();
-            List <ReportedUpdate> reportedUpdates =
-            currentPullRequestsData.getReportedUpdates().stream().filter(item ->!findReportedUpdate(prevPullRequestsData.getReportedUpdates(),item)).collect(Collectors.toList());
-              //      currentPullRequestsData.getReportedUpdates().stream().filter(item ->false).collect(Collectors.toList());
-            List <PullRequest> pullRequests =
-            currentPullRequestsData.getPullRequests().stream().filter(item -> findPullRequestByUpdates(reportedUpdates, item)).collect(Collectors.toList());
-            data.setPullRequests((ArrayList<PullRequest>)pullRequests);
-            data.setReportedUpdates((ArrayList<ReportedUpdate> )reportedUpdates);
+            List <ReportedUpdate> reportedUpdates = currentPullRequestsData.getReportedUpdates().stream().filter(item ->!findReportedUpdate(prevPullRequestsData.getReportedUpdates(),item)).collect(Collectors.toList());
+            final List <PullRequest> pullRequests = currentPullRequestsData.getPullRequests();
+            //archive
+            List <PullRequest> pullRequestsToArchive = prevPullRequestsData.getPullRequests().stream().filter(item->!(pullRequests.contains(item))).collect(Collectors.toList());
+            pullRequestsToArchive.stream().forEach(item->item.setIsOpen(false));
+
+            List<PullRequest> filteredPullRequests = pullRequests.stream().filter(item -> findPullRequestByUpdates(reportedUpdates, item)).collect(Collectors.toList());
+
+
+            data.setPullRequests(filteredPullRequests);
+            data.setPullRequestsToArchive(pullRequestsToArchive);
+            data.setReportedUpdates(reportedUpdates);
 
 
             return data;
@@ -130,19 +135,11 @@ public class PullRequestsDataManager  {
 
 
     public static void sendToJenkins(String data) {
-        System.out.println(data);
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<String, String>();
-        body.add("user",jenkinsToken);
-        body.add("data",data);
-        HttpEntity<MultiValueMap<String, String>> requestEntity=
-                new HttpEntity<>(body, headers);
-        restTemplate.postForLocation(postUrl,requestEntity);
     }
 
 
-
+    public void markReported(List<ReportedUpdate> reportedUpdates) {
+        reportedUpdates.stream().forEach(item->item.setReported(true));
+    }
 }

@@ -203,11 +203,11 @@ public class ReportedUpdatesDaoImpl implements ReportedUpdateDao {
         Connection connection = null;
         try {
             connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SQL_UPDATE_BY_PULLREQUEST_ID);
+            PreparedStatement statement = connection.prepareStatement(SQL_UPDATE_STATE);
 
-            statement.setString(3, item.getPullRequest().getId());
-            statement.setString(1, item.getCommitID());
-            statement.setInt(2,item.isReported()? 1 : 0);
+            statement.setString(2, item.getPullRequest().getId());
+            statement.setString(3, item.getCommitID());
+            statement.setInt(1,item.isReported()? 1 : 0);
             statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
