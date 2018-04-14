@@ -8,6 +8,7 @@ import model.ReportedUpdate;
 import org.apache.log4j.Logger;
 import properties.PropertiesResourceManager;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.stream.Collectors;
@@ -22,10 +23,16 @@ public class GitHubToJenkinsAgent {
     private static final String JDBC_LOGIN_PROP = "jdbc.login";
     private static final String JDBC_PWD_PROP = "jdbc.password";
 
-    private static final boolean IS_RESEND = true;
+    private static boolean isResend = true;
+    private static boolean isUseDb = true;
 
     private static final Logger logger = Logger.getLogger(GitHubToJenkinsAgent.class);
+
     public static void main(String args[]) {
+
+        List<String> argsList = Arrays.asList(args);
+        isResend = argsList.contains("-r");
+        isUseDb = argsList.contains("-d");
 
         PropertiesResourceManager prop = new PropertiesResourceManager(SETTINGS_FILE);
         Integer period = Integer.parseInt(prop.getProperty(PERIOD_PROP, "60000"));
@@ -41,27 +48,28 @@ public class GitHubToJenkinsAgent {
         DataSource dataSource = new DataSource(prop.getProperty(JDBC_URL_PROP), prop.getProperty(JDBC_LOGIN_PROP), prop.getProperty(JDBC_PWD_PROP));
         dataSource = null;
         DbPullRequestDataManager dbDataManager = null;
-        if(dataSource!=null) {
-            dbDataManager = new DbPullRequestDataManager(dataSource);
-            gitHubToJenkinsTask.setDbManager(dbDataManager);
+
+        if (isUseDb) {
+            if (dataSource != null) {
+                dbDataManager = new DbPullRequestDataManager(dataSource);
+                gitHubToJenkinsTask.setDbManager(dbDataManager);
+            }
+
         }
-
-
 
         JenkinsManager jenkinsManager = new JenkinsManager(SETTINGS_FILE);
         gitHubToJenkinsTask.setJenkinsManager(jenkinsManager);
 
-        if(dbDataManager!=null) {
+        if (dbDataManager != null) {
             PullRequestsData initialPullRequestData = dbDataManager.readPullRequestsDataFromDB();
-            List <ReportedUpdate> notReportedUpdates = initialPullRequestData.getReportedUpdates().stream().filter(item->!item.isReported()).collect(Collectors.toList());
+            List<ReportedUpdate> notReportedUpdates = initialPullRequestData.getReportedUpdates().stream().filter(item -> !item.isReported()).collect(Collectors.toList());
             int sizeNotReported = notReportedUpdates.size();
-            if(sizeNotReported > 0)
-            {
+            if (sizeNotReported > 0) {
                 logger.info("There are " + sizeNotReported + " not reported updates in DB");
-                if(IS_RESEND) {
-                    notReportedUpdates.stream().forEach(item ->jenkinsManager.postData(item));
+                if (isResend) {
+                    notReportedUpdates.stream().forEach(item -> jenkinsManager.postData(item));
                 }
-                notReportedUpdates.stream().forEach(item->item.setReported(true));
+                notReportedUpdates.stream().forEach(item -> item.setReported(true));
                 dbDataManager.writeReportUpdatesClosed();
             }
             gitHubToJenkinsTask.setInitialData(initialPullRequestData);
