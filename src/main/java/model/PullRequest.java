@@ -85,14 +85,14 @@ public class PullRequest {
 
     @Override
     public String toString() {
-        return "PullRequest:" +
+        return "\n{" +
                 "id='" + id + '\'' +
                 ", number=" + number +
                 ", repoURL='" + repoURL + '\'' +
                 ", authorLogin='" + authorLogin + '\'' +
                 ", headRefName='" + headRefName + '\'' +
                 ", baseRefName='" + baseRefName + '\'' +
-                ", isOpen=" + isOpen;
+                ", isOpen=" + isOpen + " }";
     }
 
     @Override

@@ -20,8 +20,8 @@ public class JenkinsManager {
     private static final String JENKINS_TOKEN_PROP = "jenkinsToken";
     private static final String JENKINS_POST_URL_PROP = "jenkinsPostUrl";
 
-    private static  String jenkinsPostUrl;
-    private static String jenkinsToken;
+    private   String jenkinsPostUrl;
+    private  String jenkinsToken;
 
     public JenkinsManager(String filename) {
         PropertiesResourceManager prop = new PropertiesResourceManager(filename);

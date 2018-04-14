@@ -11,21 +11,21 @@ import java.util.TimerTask;
 public class GitHubToJenkinsTask extends TimerTask {
 
 
-    private static PullRequestsData pullRequestsData = null ;
+    private  PullRequestsData pullRequestsData = null ;
 
-    private static  PullRequestsDataManager pullRequestsDataManager;
-    private static DbPullRequestDataManager dbManager = null;
-    private static JenkinsManager jenkinsManager;
-    private static GitHubApiManager gitHubApiManager;
+    private   PullRequestsDataManager pullRequestsDataManager;
+    private  DbPullRequestDataManager dbManager = null;
+    private  JenkinsManager jenkinsManager;
+    private  GitHubApiManager gitHubApiManager;
 
-    public static PullRequestsDataManager getPullRequestsDataManager() {
+    public  PullRequestsDataManager getPullRequestsDataManager() {
         return pullRequestsDataManager;
     }
 
-    public static Logger logger = Logger.getLogger(GitHubToJenkinsTask.class);
+    public  Logger logger = Logger.getLogger(GitHubToJenkinsTask.class);
 
-    public static void setPullRequestsDataManager(PullRequestsDataManager pullRequestsDataManager) {
-        GitHubToJenkinsTask.pullRequestsDataManager = pullRequestsDataManager;
+    public  void setPullRequestsDataManager(PullRequestsDataManager pullRequestsDataManager) {
+        this.pullRequestsDataManager = pullRequestsDataManager;
     }
 
     public void setInitialData(PullRequestsData pullRequestsData) {
@@ -36,13 +36,13 @@ public class GitHubToJenkinsTask extends TimerTask {
     @Override
     public void run() {
 
-        logger.info("run");
+        logger.info("*************************************************************************************************************************");
 
         if(pullRequestsData!=null) {
-            logger.info("\nThere are "+ pullRequestsData.getPullRequests().size() + " open pull request (s) from db");
-            logger.info("\nThere are "+ pullRequestsData.getReportedUpdates().size() + " open updates from db");
-            System.out.print("\n-----------------initial data-----------------\n");
-            System.out.print(pullRequestsData.getReportedUpdates().toString());
+            logger.info("There are "+ pullRequestsData.getPullRequests().size() + " open pull request (s) from db");
+            logger.info("There are "+ pullRequestsData.getReportedUpdates().size() + " open updates from db");
+            logger.info("-----------------initial data-----------------");
+            logger.info(pullRequestsData.getReportedUpdates().toString());
         }
         
 
@@ -50,28 +50,26 @@ public class GitHubToJenkinsTask extends TimerTask {
 
         logger.info("\nThere are "+ newPullRequestData.getPullRequests().size() + " open pull request (s) from github");
         logger.info("\nCreated "+ newPullRequestData.getReportedUpdates().size() + "  updates from github");
-        System.out.print("\n-----------------github data-----------------\n");
-        System.out.print(newPullRequestData.getReportedUpdates().toString());
+        logger.info("-----------------github data-----------------");
+        logger.info(newPullRequestData.getReportedUpdates().toString());
 
         PullRequestsData resultData = pullRequestsDataManager.filterUpdatedPullRequests(newPullRequestData,pullRequestsData);
 
-        System.out.print("\n-----------------data ro report -----------------\n");
-        logger.info("\nThere are  "+ resultData.getPullRequests().size() + " updated open pull request (s)");
-        if(resultData.getReportedUpdates().size() > 0 ) {
-            logger.info("\nThere are "+ resultData.getReportedUpdates().size() + " new open updates");
-            System.out.print(resultData.getReportedUpdates().toString());
+        logger.info("-----------------data ro report -----------------");
+        logger.info("There are  "+ resultData.getPullRequests().size() + " updated open pull request (s)");
+        if(resultData.getReportedUpdates().isEmpty() ) {
+            logger.info("There are "+ resultData.getReportedUpdates().size() + " new open updates");
+            logger.info(resultData.getReportedUpdates().toString());
             resultData.getReportedUpdates().stream().forEach(item ->jenkinsManager.postData(item));
 
         }
         pullRequestsDataManager.markReported(newPullRequestData.getReportedUpdates());
         if(resultData.getPullRequestsToArchive()!=null) {
-            logger.info("\nThere are "+ resultData.getPullRequestsToArchive().size() + " closed request (s)");
-            System.out.print(resultData.getPullRequestsToArchive().toString());
+            logger.info("There are "+ resultData.getPullRequestsToArchive().size() + " closed request (s)");
+            logger.info(resultData.getPullRequestsToArchive().toString());
         }
 
         pullRequestsData = new PullRequestsData(newPullRequestData.getPullRequests(),newPullRequestData.getReportedUpdates(),resultData.getPullRequestsToArchive());
-        System.out.print("\n-----------------new initial data  -----------------\n");
-        System.out.print(pullRequestsData.getReportedUpdates().toString());
 
         if(dbManager!=null) dbManager.writePullRequestsDataToDB(pullRequestsData);
     }

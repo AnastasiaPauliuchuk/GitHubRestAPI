@@ -46,7 +46,6 @@ public class GitHubToJenkinsAgent {
 
         prop = new PropertiesResourceManager(JDBC_PROPERTIES);
         DataSource dataSource = new DataSource(prop.getProperty(JDBC_URL_PROP), prop.getProperty(JDBC_LOGIN_PROP), prop.getProperty(JDBC_PWD_PROP));
-        dataSource = null;
         DbPullRequestDataManager dbDataManager = null;
 
         if (isUseDb) {
@@ -77,7 +76,6 @@ public class GitHubToJenkinsAgent {
 
 
         Timer time = new Timer();
-
         time.schedule(gitHubToJenkinsTask, 0, period);
 
     }

@@ -30,10 +30,13 @@ public class PullRequestDaoImpl implements PullRequestDao {
     public List<PullRequest> findAll() {
         List<PullRequest> result = new ArrayList<PullRequest>();
         Connection connection = null;
+        ResultSet rs = null;
         try {
             connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SQL_FIND_ALL);
-            ResultSet rs = statement.executeQuery();
+
+            try (PreparedStatement statement = connection.prepareStatement(SQL_FIND_ALL)) {
+                rs = statement.executeQuery();
+            }
             while (rs.next()) {
                 PullRequest item = new PullRequest();
                 item.setId(rs.getString(PullRequest.ID_COLUMN));
@@ -50,6 +53,7 @@ public class PullRequestDaoImpl implements PullRequestDao {
         } finally {
             try {
                 connection.close();
+                rs.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -93,20 +97,17 @@ public class PullRequestDaoImpl implements PullRequestDao {
         Connection connection = null;
         try {
             connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SQL_INSERT);
-            statement.setString(1, item.getId());
-            statement.setInt(2, item.getNumber());
-            statement.setString(3,item.getRepoURL());
-            statement.setString(4,item.getAuthorLogin());
-            statement.setString(5,item.getBaseRefName());
-            statement.setInt(7, (item.getIsOpen()) ? 1 : 0);
-            statement.setString(6,item.getHeadRefName());
-            statement.execute();
+            try (PreparedStatement statement = connection.prepareStatement(SQL_INSERT)) {
+                statement.setString(1, item.getId());
+                statement.setInt(2, item.getNumber());
+                statement.setString(3, item.getRepoURL());
+                statement.setString(4, item.getAuthorLogin());
+                statement.setString(5, item.getBaseRefName());
+                statement.setInt(7, (item.getIsOpen()) ? 1 : 0);
+                statement.setString(6, item.getHeadRefName());
+                statement.execute();
+            }
 
-            //ResultSet generatedkeys = statement.executeQuery();
-          /*  if (generatedkeys.next()) {
-                item.setId(generatedkeys.getString(1));
-            }*/
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -122,16 +123,17 @@ public class PullRequestDaoImpl implements PullRequestDao {
         Connection connection = null;
         try {
             connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SQL_UPDATE);
+            try (PreparedStatement statement = connection.prepareStatement(SQL_UPDATE)) {
 
-            statement.setInt(1, item.getNumber());
-            statement.setString(2,item.getRepoURL());
-            statement.setString(3,item.getAuthorLogin());
-            statement.setString(4,item.getBaseRefName());
-            statement.setString(5,item.getHeadRefName());
-            statement.setInt(6, (item.getIsOpen()) ? 1 : 0);
-            statement.setString(7, item.getId());
-            statement.execute();
+                statement.setInt(1, item.getNumber());
+                statement.setString(2, item.getRepoURL());
+                statement.setString(3, item.getAuthorLogin());
+                statement.setString(4, item.getBaseRefName());
+                statement.setString(5, item.getHeadRefName());
+                statement.setInt(6, (item.getIsOpen()) ? 1 : 0);
+                statement.setString(7, item.getId());
+                statement.execute();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -147,9 +149,10 @@ public class PullRequestDaoImpl implements PullRequestDao {
         Connection connection = null;
         try {
             connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SQL_DELETE);
-            statement.setString(1, item.getId());
-            statement.execute();
+            try (PreparedStatement statement = connection.prepareStatement(SQL_DELETE)) {
+                statement.setString(1, item.getId());
+                statement.execute();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -167,8 +170,10 @@ public class PullRequestDaoImpl implements PullRequestDao {
         Connection connection = null;
         try {
             connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SQL_FIND_ALL_OPEN);
-            ResultSet rs = statement.executeQuery();
+            ResultSet rs;
+            try (PreparedStatement statement = connection.prepareStatement(SQL_FIND_ALL_OPEN)) {
+                rs = statement.executeQuery();
+            }
             while (rs.next()) {
                 PullRequest item = new PullRequest();
                 item.setId(rs.getString(PullRequest.ID_COLUMN));

@@ -50,10 +50,10 @@ public class ReportedUpdate {
 
     @Override
     public String toString() {
-        return "\n\nReportedUpdate{" +
-                "\npullRequest=" + pullRequest.getId() +
-                ", \ncommitID='" + commitID + '\'' +
-                ", \nisReported=" + isReported +
+        return "\n{" +
+                "pullRequest=" + pullRequest.getId() +
+                ",commitID='" + commitID + '\'' +
+                ",isReported=" + isReported +
                 '}';
     }
 

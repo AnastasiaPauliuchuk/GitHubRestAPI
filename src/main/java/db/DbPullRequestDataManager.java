@@ -12,8 +12,8 @@ import java.util.List;
 
 public class DbPullRequestDataManager {
 
-    private static PullRequestDao pullRequestDao;
-    private static ReportedUpdateDao reportedUpdateDao;
+    private  PullRequestDao pullRequestDao;
+    private  ReportedUpdateDao reportedUpdateDao;
 
     private static DataSource dataSource;
 
@@ -63,7 +63,7 @@ public class DbPullRequestDataManager {
 
     }
 
-    public static void writeReportUpdatesClosed() {
+    public  void writeReportUpdatesClosed() {
         reportedUpdateDao = new ReportedUpdatesDaoImpl(dataSource);
         reportedUpdateDao.updateAllClose();
     }

@@ -11,19 +11,7 @@ import java.util.stream.Collectors;
 public class PullRequestsDataManager  {
 
 
-    private static PullRequestsData pullRequestsData = null;
 
-    public PullRequestsDataManager() {
-
-    }
-
-    public static PullRequestsData getPullRequestsData() {
-        return pullRequestsData;
-    }
-
-    public static void setPullRequestsData(PullRequestsData prData) {
-        pullRequestsData = prData;
-    }
 
     public static PullRequestsData filterUpdatedPullRequests(PullRequestsData currentPullRequestsData,PullRequestsData prevPullRequestsData) {
 
@@ -60,10 +48,6 @@ public class PullRequestsDataManager  {
     private static boolean findReportedUpdate(List<ReportedUpdate> reportedUpdates, ReportedUpdate element) {
         return reportedUpdates.stream().anyMatch(item->item.getPullRequest().equals(element.getPullRequest())
                 && item.getCommitID().equals(element.getCommitID()));
-
-
-      //return reportedUpdates.contains(element));
-      //||(element.isReported());
     }
 
 

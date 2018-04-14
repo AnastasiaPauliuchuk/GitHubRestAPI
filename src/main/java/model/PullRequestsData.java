@@ -51,8 +51,8 @@ public class PullRequestsData {
             if(item.getId().equals(id))
                 return item;
         }
-        pullRequests = this.getPullRequestsToArchive();
-        for(PullRequest item:pullRequests) {
+        List<PullRequest> pullRequestsToArchive = this.getPullRequestsToArchive();
+        for(PullRequest item:pullRequestsToArchive) {
             if(item.getId().equals(id))
                 return item;
         }
