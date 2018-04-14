@@ -33,19 +33,22 @@ public class ReportedUpdatesDaoImpl implements ReportedUpdateDao {
         Connection connection = null;
         try {
             connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SQL_FIND_ALL);
-            ResultSet rs = statement.executeQuery();
+            if(connection!=null) {
+                PreparedStatement statement = connection.prepareStatement(SQL_FIND_ALL);
+                ResultSet rs = statement.executeQuery();
 
-            while (rs.next()) {
-                ReportedUpdate item = new ReportedUpdate();
+                while (rs.next()) {
+                    ReportedUpdate item = new ReportedUpdate();
 
-                PullRequestDao pullRequestDao = new PullRequestDaoImpl(this.getDataSource());
-                item.setPullRequest(pullRequestDao.findById(rs.getString(ReportedUpdate.PULLREQUEST_COLUMN)));
+                    PullRequestDao pullRequestDao = new PullRequestDaoImpl(this.getDataSource());
+                    item.setPullRequest(pullRequestDao.findById(rs.getString(ReportedUpdate.PULLREQUEST_COLUMN)));
 
-                item.setReported(rs.getBoolean(ReportedUpdate.ISREPORTED_COLUMN));
-                item.setCommitID(rs.getString(ReportedUpdate.COMMIT_COLUMN));
+                    item.setReported(rs.getBoolean(ReportedUpdate.ISREPORTED_COLUMN));
+                    item.setCommitID(rs.getString(ReportedUpdate.COMMIT_COLUMN));
 
-                result.add(item);
+                    result.add(item);
+            }
+
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -55,6 +58,7 @@ public class ReportedUpdatesDaoImpl implements ReportedUpdateDao {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+
 
         }
         return result;

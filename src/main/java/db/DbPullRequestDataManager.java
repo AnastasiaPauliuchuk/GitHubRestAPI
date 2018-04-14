@@ -21,9 +21,10 @@ public class DbPullRequestDataManager {
         this.dataSource = dataSource;
     }
 
-    public  PullRequestsData readPullRequestsDataFromDB() {
+    public  PullRequestsData readPullRequestsDataFromDB() throws NullPointerException {
         pullRequestDao = new PullRequestDaoImpl(dataSource);
         reportedUpdateDao = new ReportedUpdatesDaoImpl(dataSource);
+
         List<PullRequest> pullRequests = pullRequestDao.findAllOpen();
         List<ReportedUpdate> reportedUpdates = reportedUpdateDao.findAll();
         return new PullRequestsData(pullRequests, reportedUpdates);

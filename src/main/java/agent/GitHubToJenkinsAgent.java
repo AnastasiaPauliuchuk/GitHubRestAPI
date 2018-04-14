@@ -1,14 +1,11 @@
 package agent;
 
-import dao.PullRequestDao;
-import dao.ReportedUpdateDao;
-import dao.impl.PullRequestDaoImpl;
-import dao.impl.ReportedUpdatesDaoImpl;
 import db.DataSource;
 import db.DbPullRequestDataManager;
-import model.PullRequest;
+import githubapi.GitHubApiManager;
 import model.PullRequestsData;
 import model.ReportedUpdate;
+import org.apache.log4j.Logger;
 import properties.PropertiesResourceManager;
 
 import java.util.List;
@@ -19,6 +16,7 @@ public class GitHubToJenkinsAgent {
 
     private static final String SETTINGS_FILE = "settings.properties";
     private static final String PERIOD_PROP = "periodMilis";
+
     private static final String JDBC_PROPERTIES = "jdbc.properties";
     private static final String JDBC_URL_PROP = "jdbc.url";
     private static final String JDBC_LOGIN_PROP = "jdbc.login";
@@ -26,38 +24,51 @@ public class GitHubToJenkinsAgent {
 
     private static final boolean IS_RESEND = true;
 
+    private static final Logger logger = Logger.getLogger(GitHubToJenkinsAgent.class);
     public static void main(String args[]) {
 
         PropertiesResourceManager prop = new PropertiesResourceManager(SETTINGS_FILE);
         Integer period = Integer.parseInt(prop.getProperty(PERIOD_PROP, "60000"));
 
         GitHubToJenkinsTask gitHubToJenkinsTask = new GitHubToJenkinsTask();
-        PullRequestsDataManager pullRequestsDataManager = new PullRequestsDataManager(SETTINGS_FILE);
+        PullRequestsDataManager pullRequestsDataManager = new PullRequestsDataManager();
         gitHubToJenkinsTask.setPullRequestsDataManager(pullRequestsDataManager);
+
+        GitHubApiManager gitHubApiManager = new GitHubApiManager(SETTINGS_FILE);
+        gitHubToJenkinsTask.setGitHubApiManager(gitHubApiManager);
 
         prop = new PropertiesResourceManager(JDBC_PROPERTIES);
         DataSource dataSource = new DataSource(prop.getProperty(JDBC_URL_PROP), prop.getProperty(JDBC_LOGIN_PROP), prop.getProperty(JDBC_PWD_PROP));
-        DbPullRequestDataManager dbDataManager = new DbPullRequestDataManager(dataSource);
-        gitHubToJenkinsTask.setDbManager(dbDataManager);
+        dataSource = null;
+        DbPullRequestDataManager dbDataManager = null;
+        if(dataSource!=null) {
+            dbDataManager = new DbPullRequestDataManager(dataSource);
+            gitHubToJenkinsTask.setDbManager(dbDataManager);
+        }
+
 
 
         JenkinsManager jenkinsManager = new JenkinsManager(SETTINGS_FILE);
         gitHubToJenkinsTask.setJenkinsManager(jenkinsManager);
 
-        PullRequestsData initialPullRequestData = dbDataManager.readPullRequestsDataFromDB();
-        List <ReportedUpdate> notReportedUpdates = initialPullRequestData.getReportedUpdates().stream().filter(item->!item.isReported()).collect(Collectors.toList());
-        int sizeNotReported = notReportedUpdates.size();
-        if(sizeNotReported > 0)
-        {
-            System.out.println("There are " + sizeNotReported + " not reported updates in DB");
-            if(IS_RESEND) {
-                notReportedUpdates.stream().forEach(item ->jenkinsManager.postData(item));
+        if(dbDataManager!=null) {
+            PullRequestsData initialPullRequestData = dbDataManager.readPullRequestsDataFromDB();
+            List <ReportedUpdate> notReportedUpdates = initialPullRequestData.getReportedUpdates().stream().filter(item->!item.isReported()).collect(Collectors.toList());
+            int sizeNotReported = notReportedUpdates.size();
+            if(sizeNotReported > 0)
+            {
+                logger.info("There are " + sizeNotReported + " not reported updates in DB");
+                if(IS_RESEND) {
+                    notReportedUpdates.stream().forEach(item ->jenkinsManager.postData(item));
+                }
+                notReportedUpdates.stream().forEach(item->item.setReported(true));
+                dbDataManager.writeReportUpdatesClosed();
             }
-            notReportedUpdates.stream().forEach(item->item.setReported(true));
-            dbDataManager.writeReportUpdatesClosed();
+            gitHubToJenkinsTask.setInitialData(initialPullRequestData);
         }
+
+
         Timer time = new Timer();
-        gitHubToJenkinsTask.setInitialData(initialPullRequestData);
 
         time.schedule(gitHubToJenkinsTask, 0, period);
 

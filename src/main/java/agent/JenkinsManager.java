@@ -2,7 +2,6 @@ package agent;
 
 
 import model.PullRequest;
-import model.PullRequestsData;
 import model.ReportedUpdate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -12,7 +11,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import properties.PropertiesResourceManager;
 
-import java.util.List;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class JenkinsManager {
 
@@ -38,7 +38,7 @@ public class JenkinsManager {
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<String, String>();
         body.add("user",jenkinsToken);
-        body.add("header","Pull request was updated:");
+        body.add("header", LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM d yyyy  hh:mm a"))+": Pull request was updated:");
         body.add("number",pullRequest.getNumber().toString());
         body.add("repoUrl",pullRequest.getRepoURL());
         body.add("author",pullRequest.getAuthorLogin());

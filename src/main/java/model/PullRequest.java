@@ -5,9 +5,6 @@ import java.util.Objects;
 
 public class PullRequest {
 
-    private final static String GRAPHQL_STRING =
-"{\"query\":\"{\\n  repository(owner: \\\"AnastasiaPauliuchuk\\\", name: \\\"GitTestAPI\\\") {\\n    pullRequests(last: 100, states: [OPEN]) {\\n      edges {\\n        node {\\n          id\\n          number\\n          baseRefName\\n          headRef {\\n            name\\n            target {\\n              ... on Commit {\\n                id\\n              }\\n            }\\n          }\\n          repository {\\n            url\\n          }\\n          author {\\n            login\\n          }\\n        }\\n      }\\n    }\\n  }\\n}\\n\",\"variables\":\"{}\",\"operationName\":null}";
-
 
     public static final String TABLE_NAME = "pull_requests";
     public static final String ID_COLUMN = "id";
@@ -27,9 +24,7 @@ public class PullRequest {
     private String baseRefName;
     private boolean isOpen;
 
-    public static String getGraphqlString() {
-        return GRAPHQL_STRING;
-    }
+
 
     public String getId() {
         return id;
