@@ -46,13 +46,13 @@ public class PullRequestsData {
     }
 
     public PullRequest getPullRequestById(String id) {
-        List<PullRequest> pullRequests = this.getPullRequests();
-        for(PullRequest item:pullRequests) {
+        List<PullRequest> requests = this.getPullRequests();
+        for(PullRequest item:requests) {
             if(item.getId().equals(id))
                 return item;
         }
-        List<PullRequest> pullRequestsToArchive = this.getPullRequestsToArchive();
-        for(PullRequest item:pullRequestsToArchive) {
+        List<PullRequest> requestsToArchive = this.getPullRequestsToArchive();
+        for(PullRequest item:requestsToArchive) {
             if(item.getId().equals(id))
                 return item;
         }

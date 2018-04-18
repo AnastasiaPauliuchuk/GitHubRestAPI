@@ -29,64 +29,59 @@ public class PullRequestDaoImpl implements PullRequestDao {
 
     public List<PullRequest> findAll() {
         List<PullRequest> result = new ArrayList<PullRequest>();
-        Connection connection = null;
-        ResultSet rs = null;
-        try {
-            connection = dataSource.getConnection();
-
+        try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement(SQL_FIND_ALL)) {
-                rs = statement.executeQuery();
-            }
-            while (rs.next()) {
-                PullRequest item = new PullRequest();
-                item.setId(rs.getString(PullRequest.ID_COLUMN));
-                item.setNumber(rs.getInt(PullRequest.NUMBER_COLUMN));
-                item.setRepoURL(rs.getString(PullRequest.REPO_COLUMN));
-                item.setBaseRefName(rs.getString(PullRequest.BASE_COLUMN));
-                item.setHeadRefName(rs.getString(PullRequest.HEAD_COLUMN));
-                item.setAuthorLogin(rs.getString(PullRequest.AUTHOR_COLUMN));
-                item.setIsOpen(rs.getBoolean(PullRequest.IS_OPEN_COLUMN));
-                result.add(item);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
-                rs.close();
+               try( ResultSet rs = statement.executeQuery()) {
+                   while (rs.next()) {
+                       PullRequest item = new PullRequest();
+                       item.setId(rs.getString(PullRequest.ID_COLUMN));
+                       item.setNumber(rs.getInt(PullRequest.NUMBER_COLUMN));
+                       item.setRepoURL(rs.getString(PullRequest.REPO_COLUMN));
+                       item.setBaseRefName(rs.getString(PullRequest.BASE_COLUMN));
+                       item.setHeadRefName(rs.getString(PullRequest.HEAD_COLUMN));
+                       item.setAuthorLogin(rs.getString(PullRequest.AUTHOR_COLUMN));
+                       item.setIsOpen(rs.getBoolean(PullRequest.IS_OPEN_COLUMN));
+                       result.add(item);
+                   }
+               } catch (SQLException e) {
+                   e.printStackTrace();
+               }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return result;
     }
 
     public PullRequest findById(String id) {
         PullRequest item = null;
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SQL_FIND_BY_ID);
-            statement.setString(1, id);
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                item = new PullRequest();
-                item.setId(rs.getString(PullRequest.ID_COLUMN));
-                item.setNumber(rs.getInt(PullRequest.NUMBER_COLUMN));
-                item.setRepoURL(rs.getString(PullRequest.REPO_COLUMN));
-                item.setBaseRefName(rs.getString(PullRequest.BASE_COLUMN));
-                item.setHeadRefName(rs.getString(PullRequest.HEAD_COLUMN));
-                item.setAuthorLogin(rs.getString(PullRequest.AUTHOR_COLUMN));
-                item.setIsOpen(rs.getBoolean(PullRequest.IS_OPEN_COLUMN));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
+        try (Connection connection = dataSource.getConnection()) {
+
+            try (PreparedStatement statement = connection.prepareStatement(SQL_FIND_BY_ID)) {
+                statement.setString(1, id);
+                try(ResultSet rs = statement.executeQuery()) {
+                    while (rs.next()) {
+                        item = new PullRequest();
+                        item.setId(rs.getString(PullRequest.ID_COLUMN));
+                        item.setNumber(rs.getInt(PullRequest.NUMBER_COLUMN));
+                        item.setRepoURL(rs.getString(PullRequest.REPO_COLUMN));
+                        item.setBaseRefName(rs.getString(PullRequest.BASE_COLUMN));
+                        item.setHeadRefName(rs.getString(PullRequest.HEAD_COLUMN));
+                        item.setAuthorLogin(rs.getString(PullRequest.AUTHOR_COLUMN));
+                        item.setIsOpen(rs.getBoolean(PullRequest.IS_OPEN_COLUMN));
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return item;
     }
@@ -94,9 +89,8 @@ public class PullRequestDaoImpl implements PullRequestDao {
 
 
     public void insert(PullRequest item) {
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
+        try (Connection  connection = dataSource.getConnection()){
+
             try (PreparedStatement statement = connection.prepareStatement(SQL_INSERT)) {
                 statement.setString(1, item.getId());
                 statement.setInt(2, item.getNumber());
@@ -106,23 +100,18 @@ public class PullRequestDaoImpl implements PullRequestDao {
                 statement.setInt(7, (item.getIsOpen()) ? 1 : 0);
                 statement.setString(6, item.getHeadRefName());
                 statement.execute();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 
     public void update(PullRequest item) {
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
+        try (Connection connection = dataSource.getConnection()) {
+
             try (PreparedStatement statement = connection.prepareStatement(SQL_UPDATE)) {
 
                 statement.setInt(1, item.getNumber());
@@ -133,66 +122,54 @@ public class PullRequestDaoImpl implements PullRequestDao {
                 statement.setInt(6, (item.getIsOpen()) ? 1 : 0);
                 statement.setString(7, item.getId());
                 statement.execute();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
     public void delete(PullRequest item) {
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
+        try (Connection connection = dataSource.getConnection()) {
+
             try (PreparedStatement statement = connection.prepareStatement(SQL_DELETE)) {
                 statement.setString(1, item.getId());
                 statement.execute();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
     @Override
     public List<PullRequest> findAllOpen() {
-        List<PullRequest> result = new ArrayList<PullRequest>();
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
-            ResultSet rs;
+        List<PullRequest> result = new ArrayList<>();
+        try (Connection  connection = dataSource.getConnection()){
             try (PreparedStatement statement = connection.prepareStatement(SQL_FIND_ALL_OPEN)) {
-                rs = statement.executeQuery();
-            }
-            while (rs.next()) {
-                PullRequest item = new PullRequest();
-                item.setId(rs.getString(PullRequest.ID_COLUMN));
-                item.setNumber(rs.getInt(PullRequest.NUMBER_COLUMN));
-                item.setRepoURL(rs.getString(PullRequest.REPO_COLUMN));
-                item.setBaseRefName(rs.getString(PullRequest.BASE_COLUMN));
-                item.setHeadRefName(rs.getString(PullRequest.HEAD_COLUMN));
-                item.setAuthorLogin(rs.getString(PullRequest.AUTHOR_COLUMN));
-                item.setIsOpen(rs.getBoolean(PullRequest.IS_OPEN_COLUMN));
-                result.add(item);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
+               try( ResultSet rs = statement.executeQuery()){
+                   while (rs.next()) {
+                       PullRequest item = new PullRequest();
+                       item.setId(rs.getString(PullRequest.ID_COLUMN));
+                       item.setNumber(rs.getInt(PullRequest.NUMBER_COLUMN));
+                       item.setRepoURL(rs.getString(PullRequest.REPO_COLUMN));
+                       item.setBaseRefName(rs.getString(PullRequest.BASE_COLUMN));
+                       item.setHeadRefName(rs.getString(PullRequest.HEAD_COLUMN));
+                       item.setAuthorLogin(rs.getString(PullRequest.AUTHOR_COLUMN));
+                       item.setIsOpen(rs.getBoolean(PullRequest.IS_OPEN_COLUMN));
+                       result.add(item);
+                   }
+               } catch (SQLException e) {
+                   e.printStackTrace();
+               }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return result;
     }

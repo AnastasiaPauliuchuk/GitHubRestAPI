@@ -13,9 +13,9 @@ public class PullRequestsDataManager  {
 
 
 
-    public static PullRequestsData filterUpdatedPullRequests(PullRequestsData currentPullRequestsData,PullRequestsData prevPullRequestsData) {
+    public PullRequestsData filterUpdatedPullRequests(PullRequestsData currentPullRequestsData,PullRequestsData prevPullRequestsData) {
 
-        if(prevPullRequestsData==null || prevPullRequestsData.getPullRequests().size()==0) {
+        if(prevPullRequestsData==null || prevPullRequestsData.getPullRequests().isEmpty()) {
             return currentPullRequestsData;
         }
         else {
@@ -41,19 +41,15 @@ public class PullRequestsDataManager  {
 
     }
 
-    private static boolean findPullRequestByUpdates(List<ReportedUpdate> reportedUpdates, PullRequest pullRequest) {
+    private  boolean findPullRequestByUpdates(List<ReportedUpdate> reportedUpdates, PullRequest pullRequest) {
         return reportedUpdates.stream().anyMatch(item->item.getPullRequest().equals(pullRequest));
     }
 
-    private static boolean findReportedUpdate(List<ReportedUpdate> reportedUpdates, ReportedUpdate element) {
+    private  boolean findReportedUpdate(List<ReportedUpdate> reportedUpdates, ReportedUpdate element) {
         return reportedUpdates.stream().anyMatch(item->item.getPullRequest().equals(element.getPullRequest())
                 && item.getCommitID().equals(element.getCommitID()));
     }
 
-
-    public static void sendToJenkins(String data) {
-
-    }
 
 
     public void markReported(List<ReportedUpdate> reportedUpdates) {

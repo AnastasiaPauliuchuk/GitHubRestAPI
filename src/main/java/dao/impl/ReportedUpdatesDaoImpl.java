@@ -30,115 +30,104 @@ public class ReportedUpdatesDaoImpl implements ReportedUpdateDao {
 
     public List<ReportedUpdate> findAll() {
         List<ReportedUpdate> result = new ArrayList<ReportedUpdate>();
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
-            if(connection!=null) {
-                PreparedStatement statement = connection.prepareStatement(SQL_FIND_ALL);
-                ResultSet rs = statement.executeQuery();
+        try (Connection connection = dataSource.getConnection()) {
+                try (PreparedStatement statement = connection.prepareStatement(SQL_FIND_ALL)) {
+                    try(ResultSet rs = statement.executeQuery()) {
+                        while (rs.next()) {
+                            ReportedUpdate item = new ReportedUpdate();
 
-                while (rs.next()) {
-                    ReportedUpdate item = new ReportedUpdate();
+                            PullRequestDao pullRequestDao = new PullRequestDaoImpl(this.getDataSource());
+                            item.setPullRequest(pullRequestDao.findById(rs.getString(ReportedUpdate.PULLREQUEST_COLUMN)));
 
-                    PullRequestDao pullRequestDao = new PullRequestDaoImpl(this.getDataSource());
-                    item.setPullRequest(pullRequestDao.findById(rs.getString(ReportedUpdate.PULLREQUEST_COLUMN)));
+                            item.setReported(rs.getBoolean(ReportedUpdate.ISREPORTED_COLUMN));
+                            item.setCommitID(rs.getString(ReportedUpdate.COMMIT_COLUMN));
 
-                    item.setReported(rs.getBoolean(ReportedUpdate.ISREPORTED_COLUMN));
-                    item.setCommitID(rs.getString(ReportedUpdate.COMMIT_COLUMN));
+                            result.add(item);
+                        }
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
 
-                    result.add(item);
-            }
 
-            }
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
-
         }
         return result;
     }
+
     @Override
     public List<ReportedUpdate> findAllNotReported() {
-        List<ReportedUpdate> result = new ArrayList<ReportedUpdate>();
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SQL_FIND_ALL_NOT_REPORTED);
-            ResultSet rs = statement.executeQuery();
+        List<ReportedUpdate> result = new ArrayList<>();
+        try (Connection connection = dataSource.getConnection();){
 
-            while (rs.next()) {
-                ReportedUpdate item = new ReportedUpdate();
+            try (PreparedStatement statement = connection.prepareStatement(SQL_FIND_ALL_NOT_REPORTED)) {
+                try(ResultSet rs = statement.executeQuery()) {
+                    while (rs.next()) {
+                        ReportedUpdate item = new ReportedUpdate();
 
-                PullRequestDao pullRequestDao = new PullRequestDaoImpl(this.getDataSource());
-                item.setPullRequest(pullRequestDao.findById(rs.getString(ReportedUpdate.PULLREQUEST_COLUMN)));
+                        PullRequestDao pullRequestDao = new PullRequestDaoImpl(this.getDataSource());
+                        item.setPullRequest(pullRequestDao.findById(rs.getString(ReportedUpdate.PULLREQUEST_COLUMN)));
 
-                item.setReported(rs.getBoolean(ReportedUpdate.ISREPORTED_COLUMN));
-                item.setCommitID(rs.getString(ReportedUpdate.COMMIT_COLUMN));
+                        item.setReported(rs.getBoolean(ReportedUpdate.ISREPORTED_COLUMN));
+                        item.setCommitID(rs.getString(ReportedUpdate.COMMIT_COLUMN));
 
-                result.add(item);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
+                        result.add(item);
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
 
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return result;
     }
 
     @Override
     public void updateAllClose() {
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SQL_UPDATE_ALL_REPORTED);
-            statement.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
+
+        try (Connection connection = dataSource.getConnection();) {
+            try (PreparedStatement statement = connection.prepareStatement(SQL_UPDATE_ALL_REPORTED)) {
+                statement.execute();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
     public ReportedUpdate findByPullRequestId(Long id) {
         ReportedUpdate item = null;
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SQL_FIND_BY_PULLREQUEST_ID);
-            statement.setLong(1, id);
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                item = new ReportedUpdate();
+        try (Connection connection = dataSource.getConnection();) {
 
-                PullRequestDao pullRequestDao = new PullRequestDaoImpl(this.getDataSource());
-                item.setPullRequest(pullRequestDao.findById(rs.getString(ReportedUpdate.PULLREQUEST_COLUMN)));
+            try (PreparedStatement statement = connection.prepareStatement(SQL_FIND_BY_PULLREQUEST_ID)) {
+                statement.setLong(1, id);
+                try (ResultSet rs = statement.executeQuery() ){
+                    while (rs.next()) {
+                        item = new ReportedUpdate();
 
-                item.setReported(rs.getBoolean(ReportedUpdate.ISREPORTED_COLUMN));
-                item.setCommitID(rs.getString(ReportedUpdate.COMMIT_COLUMN));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
+                        PullRequestDao pullRequestDao = new PullRequestDaoImpl(this.getDataSource());
+                        item.setPullRequest(pullRequestDao.findById(rs.getString(ReportedUpdate.PULLREQUEST_COLUMN)));
+
+                        item.setReported(rs.getBoolean(ReportedUpdate.ISREPORTED_COLUMN));
+                        item.setCommitID(rs.getString(ReportedUpdate.COMMIT_COLUMN));
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return item;
     }
@@ -146,99 +135,84 @@ public class ReportedUpdatesDaoImpl implements ReportedUpdateDao {
     @Override
     public ReportedUpdate findByCompositeKey(String pullRequestId, String commitId) {
         ReportedUpdate item = null;
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SQL_FIND_BY_PULLREQUEST_AND_COMMIT);
-            statement.setString(1, pullRequestId);
-            statement.setString(2, commitId);
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                item = new ReportedUpdate();
+        try (Connection  connection = dataSource.getConnection()){
 
-                PullRequestDao pullRequestDao = new PullRequestDaoImpl(this.getDataSource());
-                item.setPullRequest(pullRequestDao.findById(rs.getString(ReportedUpdate.PULLREQUEST_COLUMN)));
+            try (PreparedStatement statement = connection.prepareStatement(SQL_FIND_BY_PULLREQUEST_AND_COMMIT)) {
+                statement.setString(1, pullRequestId);
+                statement.setString(2, commitId);
+                try(ResultSet rs = statement.executeQuery()) {
+                    while (rs.next()) {
+                        item = new ReportedUpdate();
 
-                item.setReported(rs.getBoolean(ReportedUpdate.ISREPORTED_COLUMN));
-                item.setCommitID(rs.getString(ReportedUpdate.COMMIT_COLUMN));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
+                        PullRequestDao pullRequestDao = new PullRequestDaoImpl(this.getDataSource());
+                        item.setPullRequest(pullRequestDao.findById(rs.getString(ReportedUpdate.PULLREQUEST_COLUMN)));
+
+                        item.setReported(rs.getBoolean(ReportedUpdate.ISREPORTED_COLUMN));
+                        item.setCommitID(rs.getString(ReportedUpdate.COMMIT_COLUMN));
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return item;
     }
 
 
     public void insert(ReportedUpdate item) {
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SQL_INSERT);
+        try (Connection  connection = dataSource.getConnection();) {
+
+            try (PreparedStatement statement = connection.prepareStatement(SQL_INSERT)) {
 
 
-            statement.setString(1, item.getPullRequest().getId());
-            statement.setString(2, item.getCommitID());
-            statement.setInt(3, (item.isReported()) ? 1 : 0 );
+                statement.setString(1, item.getPullRequest().getId());
+                statement.setString(2, item.getCommitID());
+                statement.setInt(3, (item.isReported()) ? 1 : 0);
 
-            statement.execute();
-
-            //ResultSet generatedkeys = statement.executeQuery();
-          /*  if (generatedkeys.next()) {
-                item.setId(generatedkeys.getString(1));
-            }*/
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
+                statement.execute();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
     public void update(ReportedUpdate item) {
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SQL_UPDATE_STATE);
 
-            statement.setString(2, item.getPullRequest().getId());
-            statement.setString(3, item.getCommitID());
-            statement.setInt(1,item.isReported()? 1 : 0);
-            statement.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
+        try (Connection connection = dataSource.getConnection()){
+
+            try (PreparedStatement statement = connection.prepareStatement(SQL_UPDATE_STATE)) {
+
+                statement.setString(2, item.getPullRequest().getId());
+                statement.setString(3, item.getCommitID());
+                statement.setInt(1, item.isReported() ? 1 : 0);
+                statement.execute();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
     public void delete(ReportedUpdate item) {
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SQL_DELETE_BY_PULLREQUEST_ID);
-            statement.setString(1, item.getPullRequest().getId());
-            statement.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
+        try (Connection connection = dataSource.getConnection()) {
+
+            try (PreparedStatement statement = connection.prepareStatement(SQL_DELETE_BY_PULLREQUEST_ID)) {
+                statement.setString(1, item.getPullRequest().getId());
+                statement.execute();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

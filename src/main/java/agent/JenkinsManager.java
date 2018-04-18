@@ -36,7 +36,7 @@ public class JenkinsManager {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<String, String>();
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("user",jenkinsToken);
         body.add("header", LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM d yyyy  hh:mm a"))+": Pull request was updated:");
         body.add("number",pullRequest.getNumber().toString());

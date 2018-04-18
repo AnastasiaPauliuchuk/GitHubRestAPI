@@ -15,7 +15,7 @@ public class DbPullRequestDataManager {
     private  PullRequestDao pullRequestDao;
     private  ReportedUpdateDao reportedUpdateDao;
 
-    private static DataSource dataSource;
+    private  DataSource dataSource;
 
     public DbPullRequestDataManager(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -56,11 +56,6 @@ public class DbPullRequestDataManager {
             }
 
         }
-        // pullRequestsData.getPullRequests().stream().
-        //pullRequestDao.insert();
-        //List<PullRequest> pullRequests = pullRequestDao.findAllOpen();
-        // List<ReportedUpdate> reportedUpdates = reportedUpdateDao.findAllNotReported();
-
     }
 
     public  void writeReportUpdatesClosed() {

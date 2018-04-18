@@ -23,14 +23,6 @@ public class ReportedUpdate {
         this.pullRequest = pullRequest;
     }
 
-   /* public String getPullRequestId() {
-        return pullRequestId;
-    }
-
-    public void setPullRequestId(String pullRequestId) {
-        this.pullRequestId = pullRequestId;
-    }
-*/
     public String getCommitID() {
         return commitID;
     }

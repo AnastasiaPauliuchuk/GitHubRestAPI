@@ -11,6 +11,9 @@ import java.util.ArrayList;
 
 public class JsonPullRequestDataParser {
 
+    private JsonPullRequestDataParser() {
+    }
+
     private static PullRequest parsePullRequest(JsonNode node) {
         PullRequest pullRequest = new PullRequest() ;
 

@@ -21,7 +21,7 @@ public class GitHubToJenkinsAgent {
     private static final String JDBC_PROPERTIES = "jdbc.properties";
     private static final String JDBC_URL_PROP = "jdbc.url";
     private static final String JDBC_LOGIN_PROP = "jdbc.login";
-    private static final String JDBC_PWD_PROP = "jdbc.password";
+    private static final String JDBC_PASS_PROP = "jdbc.password";
 
     private static boolean isResend = true;
     private static boolean isUseDb = true;
@@ -45,15 +45,12 @@ public class GitHubToJenkinsAgent {
         gitHubToJenkinsTask.setGitHubApiManager(gitHubApiManager);
 
         prop = new PropertiesResourceManager(JDBC_PROPERTIES);
-        DataSource dataSource = new DataSource(prop.getProperty(JDBC_URL_PROP), prop.getProperty(JDBC_LOGIN_PROP), prop.getProperty(JDBC_PWD_PROP));
+        DataSource dataSource = new DataSource(prop.getProperty(JDBC_URL_PROP), prop.getProperty(JDBC_LOGIN_PROP), prop.getProperty(JDBC_PASS_PROP));
         DbPullRequestDataManager dbDataManager = null;
 
         if (isUseDb) {
-            if (dataSource != null) {
-                dbDataManager = new DbPullRequestDataManager(dataSource);
-                gitHubToJenkinsTask.setDbManager(dbDataManager);
-            }
-
+            dbDataManager = new DbPullRequestDataManager(dataSource);
+            gitHubToJenkinsTask.setDbManager(dbDataManager);
         }
 
         JenkinsManager jenkinsManager = new JenkinsManager(SETTINGS_FILE);
