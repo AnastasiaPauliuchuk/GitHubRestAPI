@@ -1,0 +1,62 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+  http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+
+
+    <context:property-placeholder location="classpath:settings.properties"  order="1" ignore-unresolvable="true" />
+    <context:property-placeholder location="classpath:jdbc.properties"  order="2" ignore-unresolvable="true" />
+
+    <bean id="pullRequestsDataManager" class="agent.PullRequestsDataManager"/>
+
+    <bean id="gitHubApiManager" class="githubapi.GitHubApiManager">
+        <constructor-arg type="java.lang.String" value="${authToken}"/>
+        <constructor-arg type="java.lang.String" value="${repositoryOwner}"/>
+        <constructor-arg type="java.lang.String" value="${repositoryName}"/>
+        <property name="jsonPullRequestDataParser" ref="jsonPullRequestDataParser"/>
+    </bean>
+
+    <bean id="jsonPullRequestDataParser" class="json.JsonPullRequestDataParser"/>
+
+
+    <bean id="jenkinsManager" class="agent.JenkinsManager">
+        <constructor-arg type="java.lang.String" value="${jenkinsToken}"/>
+        <constructor-arg type="java.lang.String" value="${jenkinsPostUrl}"/>
+    </bean>
+
+
+    <bean id="baseGitHubTask" class="agent.GitHubToJenkinsTask">
+        <property name="pullRequestsDataManager" ref="pullRequestsDataManager"/>
+        <property name="gitHubApiManager" ref="gitHubApiManager"/>
+        <property name="jenkinsManager" ref="jenkinsManager"/>
+    </bean>
+
+    <beans profile="withDB">
+        <bean id="gitHubTask" class="agent.GitHubToJenkinsTask" parent="baseGitHubTask">
+
+            <property name="dbManager" ref="dbManager"/>
+        </bean>
+
+        <bean id="dbManager" class="db.DbPullRequestDataManager">
+            <property name = "dataSource" ref="dataSource"/>
+        </bean>
+
+
+        <bean id="dataSource" class="db.DataSource"  >
+            <constructor-arg type="java.lang.String" value="${jdbc.url}"/>
+            <constructor-arg type="java.lang.String" value="${jdbc.login}"/>
+            <constructor-arg type="java.lang.String" value="${jdbc.password}"/>
+        </bean>
+    </beans>
+
+    <beans profile="withoutDB">
+        <bean id="gitHubTask" class="agent.GitHubToJenkinsTask" parent="baseGitHubTask">
+
+        </bean>
+    </beans>
+
+</beans>

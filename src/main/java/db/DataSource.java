@@ -1,10 +1,12 @@
 package db;
 
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DataSource {
+
     private String url;
     private String login;
     private String password;
@@ -31,12 +33,4 @@ public class DataSource {
         return DriverManager.getConnection(url, login, password);
     }
 
-    public void closeConnection(Connection connection) {
-        if (connection == null) return;
-        try {
-            connection.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 }

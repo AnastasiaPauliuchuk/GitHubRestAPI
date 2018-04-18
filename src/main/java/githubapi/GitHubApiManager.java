@@ -13,25 +13,18 @@ public class GitHubApiManager {
     private static final  String PULL_REQUESTS_GRAPHQL_STRING =
             "{\"query\":\"{\\n  repository(owner: \\\"AnastasiaPauliuchuk\\\", name: \\\"GitTestAPI\\\") {\\n    pullRequests(last: 100, states: [OPEN]) {\\n      edges {\\n        node {\\n          id\\n          number\\n          baseRefName\\n          headRef {\\n            name\\n            target {\\n              ... on Commit {\\n                id\\n              }\\n            }\\n          }\\n          repository {\\n            url\\n          }\\n          author {\\n            login\\n          }\\n        }\\n      }\\n    }\\n  }\\n}\\n\",\"variables\":\"{}\",\"operationName\":null}";
 
-    private static final String AUTH_TOKEN_PROP = "authToken";
-    private static final String REPO_OWNER_PROP = "repositoryOwner";
-    private static final String REPO_NAME_PROP = "repositoryName";
-
     private static final String GRAPHQL_RESOURCE_URL = "https://api.github.com/graphql";
-
 
     private  String accessToken;
     private  String repositoryOwner;
     private  String repositoryName;
     private JsonPullRequestDataParser jsonPullRequestDataParser;
 
-    public GitHubApiManager(String settingsFilename) {
-        PropertiesResourceManager prop = new PropertiesResourceManager(settingsFilename);
-        accessToken = prop.getProperty(AUTH_TOKEN_PROP);
-        repositoryOwner = prop.getProperty(REPO_OWNER_PROP);
-        repositoryName = prop.getProperty(REPO_NAME_PROP);
+    public GitHubApiManager(String accessToken, String repositoryOwner, String repositoryName) {
+        this.accessToken = accessToken;
+        this.repositoryOwner = repositoryOwner;
+        this.repositoryName = repositoryName;
     }
-
 
     public  PullRequestsData queryPullRequests() {
 
@@ -50,7 +43,7 @@ public class GitHubApiManager {
         }
     }
 
-    public void setJsonParser(JsonPullRequestDataParser jsonParser) {
+    public void setJsonPullRequestDataParser(JsonPullRequestDataParser jsonParser) {
         this.jsonPullRequestDataParser = jsonParser;
     }
 }

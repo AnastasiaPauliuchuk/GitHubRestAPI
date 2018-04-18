@@ -17,16 +17,14 @@ import java.time.format.DateTimeFormatter;
 public class JenkinsManager {
 
 
-    private static final String JENKINS_TOKEN_PROP = "jenkinsToken";
-    private static final String JENKINS_POST_URL_PROP = "jenkinsPostUrl";
 
     private   String jenkinsPostUrl;
     private  String jenkinsToken;
 
-    public JenkinsManager(String filename) {
-        PropertiesResourceManager prop = new PropertiesResourceManager(filename);
-        jenkinsPostUrl = prop.getProperty(JENKINS_POST_URL_PROP);
-        jenkinsToken = prop.getProperty(JENKINS_TOKEN_PROP);
+
+    public JenkinsManager(String jenkinsPostUrl, String jenkinsToken) {
+        this.jenkinsPostUrl = jenkinsPostUrl;
+        this.jenkinsToken = jenkinsToken;
     }
 
     public void postData(ReportedUpdate reportedUpdate) {

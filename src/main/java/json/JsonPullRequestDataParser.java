@@ -15,7 +15,6 @@ public class JsonPullRequestDataParser {
 
     private  PullRequest parsePullRequest(JsonNode node) {
         PullRequest pullRequest = new PullRequest() ;
-
         pullRequest.setNumber(node.get("number").asInt());
         pullRequest.setId(node.get("id").textValue());
         pullRequest.setHeadRefName(node.get("headRef").get("name").textValue());
