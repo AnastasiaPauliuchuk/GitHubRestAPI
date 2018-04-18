@@ -1,8 +1,13 @@
 package model;
 
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.util.Objects;
 
+@Entity
+@Table(name = "pull_requests")
 public class PullRequest {
 
 
@@ -15,13 +20,25 @@ public class PullRequest {
     public static final String REPO_COLUMN = "repo_url";
     public static final String IS_OPEN_COLUMN = "is_open";
 
-
+    @Column(name = "id")
     private String id;
+
+    @Column(name = "number")
     private Integer number;
+
+    @Column(name = "repo_url")
     private String repoURL;
+
+    @Column(name = "author")
     private String authorLogin;
+
+    @Column(name = "head_branch")
     private String headRefName;
+
+    @Column(name = "base_branch")
     private String baseRefName;
+
+    @Column(name = "is_open")
     private boolean isOpen;
 
 

@@ -1,7 +1,12 @@
 package model;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.util.Objects;
 
+@Entity
+@Table(name = "reported_updates")
 public class ReportedUpdate {
 
 
@@ -11,8 +16,11 @@ public class ReportedUpdate {
     public static final String ISREPORTED_COLUMN = "is_reported";
 
 
+    @Column(name = "pull_request_id")
     private PullRequest pullRequest;
+    @Column(name = "commit_id")
     private String commitID;
+    @Column(name = "is_reported")
     private boolean isReported;
 
     public PullRequest getPullRequest() {
