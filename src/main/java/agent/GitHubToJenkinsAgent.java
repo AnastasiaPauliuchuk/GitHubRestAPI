@@ -3,6 +3,7 @@ package agent;
 import db.DataSource;
 import db.DbPullRequestDataManager;
 import githubapi.GitHubApiManager;
+import json.JsonPullRequestDataParser;
 import model.PullRequestsData;
 import model.ReportedUpdate;
 import org.apache.log4j.Logger;
@@ -42,6 +43,8 @@ public class GitHubToJenkinsAgent {
         gitHubToJenkinsTask.setPullRequestsDataManager(pullRequestsDataManager);
 
         GitHubApiManager gitHubApiManager = new GitHubApiManager(SETTINGS_FILE);
+        JsonPullRequestDataParser jsonPullRequestDataParser = new JsonPullRequestDataParser();
+        gitHubApiManager.setJsonParser(jsonPullRequestDataParser);
         gitHubToJenkinsTask.setGitHubApiManager(gitHubApiManager);
 
         prop = new PropertiesResourceManager(JDBC_PROPERTIES);

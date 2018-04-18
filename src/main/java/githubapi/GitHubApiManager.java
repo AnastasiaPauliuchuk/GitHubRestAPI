@@ -23,6 +23,7 @@ public class GitHubApiManager {
     private  String accessToken;
     private  String repositoryOwner;
     private  String repositoryName;
+    private JsonPullRequestDataParser jsonPullRequestDataParser;
 
     public GitHubApiManager(String settingsFilename) {
         PropertiesResourceManager prop = new PropertiesResourceManager(settingsFilename);
@@ -42,11 +43,14 @@ public class GitHubApiManager {
         HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
         ResponseEntity<String> response = restTemplate.exchange(GRAPHQL_RESOURCE_URL, HttpMethod.POST, entity, String.class);
         try {
-            return JsonPullRequestDataParser.parsePullRequestList(response.getBody());
+            return jsonPullRequestDataParser.parsePullRequestList(response.getBody());
         } catch (IOException e) {
             e.printStackTrace();
             return new PullRequestsData();
         }
     }
 
+    public void setJsonParser(JsonPullRequestDataParser jsonParser) {
+        this.jsonPullRequestDataParser = jsonParser;
+    }
 }

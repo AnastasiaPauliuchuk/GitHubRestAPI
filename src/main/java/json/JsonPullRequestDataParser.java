@@ -11,10 +11,9 @@ import java.util.ArrayList;
 
 public class JsonPullRequestDataParser {
 
-    private JsonPullRequestDataParser() {
-    }
 
-    private static PullRequest parsePullRequest(JsonNode node) {
+
+    private  PullRequest parsePullRequest(JsonNode node) {
         PullRequest pullRequest = new PullRequest() ;
 
         pullRequest.setNumber(node.get("number").asInt());
@@ -26,7 +25,7 @@ public class JsonPullRequestDataParser {
         pullRequest.setIsOpen(true);
         return pullRequest;
     }
-    private static ReportedUpdate parsePullRequestUpdate(PullRequest pullRequest, JsonNode node) {
+    private  ReportedUpdate parsePullRequestUpdate(PullRequest pullRequest, JsonNode node) {
         ReportedUpdate reportedUpdate = new ReportedUpdate();
         reportedUpdate.setPullRequest(pullRequest);
         reportedUpdate.setCommitID(node.get("headRef").get("target").get("id").textValue());
@@ -34,7 +33,7 @@ public class JsonPullRequestDataParser {
         return reportedUpdate;
     }
 
-    public static PullRequestsData parsePullRequestList(String jsonString) throws IOException {
+    public  PullRequestsData parsePullRequestList(String jsonString) throws IOException {
         ArrayList<PullRequest> pullRequests = new ArrayList<>();
         ArrayList<ReportedUpdate> reportedUpdates = new ArrayList<>();
         JsonNode tree = new ObjectMapper().readTree(jsonString);
