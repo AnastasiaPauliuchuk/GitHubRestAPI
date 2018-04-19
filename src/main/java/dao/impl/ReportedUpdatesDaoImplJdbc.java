@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReportedUpdatesDaoImpl implements ReportedUpdateDao {
+public class ReportedUpdatesDaoImplJdbc implements ReportedUpdateDao {
 
     private DataSource dataSource;
 
@@ -24,7 +24,7 @@ public class ReportedUpdatesDaoImpl implements ReportedUpdateDao {
         this.dataSource = dataSource;
     }
 
-    public ReportedUpdatesDaoImpl(DataSource dataSource) {
+    public ReportedUpdatesDaoImplJdbc(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
@@ -36,7 +36,7 @@ public class ReportedUpdatesDaoImpl implements ReportedUpdateDao {
                         while (rs.next()) {
                             ReportedUpdate item = new ReportedUpdate();
 
-                            PullRequestDao pullRequestDao = new PullRequestDaoImpl(this.getDataSource());
+                            PullRequestDao pullRequestDao = new PullRequestDaoImplJdbc(this.getDataSource());
                             item.setPullRequest(pullRequestDao.findById(rs.getString(ReportedUpdate.PULLREQUEST_COLUMN)));
 
                             item.setReported(rs.getBoolean(ReportedUpdate.ISREPORTED_COLUMN));
@@ -68,7 +68,7 @@ public class ReportedUpdatesDaoImpl implements ReportedUpdateDao {
                     while (rs.next()) {
                         ReportedUpdate item = new ReportedUpdate();
 
-                        PullRequestDao pullRequestDao = new PullRequestDaoImpl(this.getDataSource());
+                        PullRequestDao pullRequestDao = new PullRequestDaoImplJdbc(this.getDataSource());
                         item.setPullRequest(pullRequestDao.findById(rs.getString(ReportedUpdate.PULLREQUEST_COLUMN)));
 
                         item.setReported(rs.getBoolean(ReportedUpdate.ISREPORTED_COLUMN));
@@ -113,7 +113,7 @@ public class ReportedUpdatesDaoImpl implements ReportedUpdateDao {
                     while (rs.next()) {
                         item = new ReportedUpdate();
 
-                        PullRequestDao pullRequestDao = new PullRequestDaoImpl(this.getDataSource());
+                        PullRequestDao pullRequestDao = new PullRequestDaoImplJdbc(this.getDataSource());
                         item.setPullRequest(pullRequestDao.findById(rs.getString(ReportedUpdate.PULLREQUEST_COLUMN)));
 
                         item.setReported(rs.getBoolean(ReportedUpdate.ISREPORTED_COLUMN));
@@ -144,7 +144,7 @@ public class ReportedUpdatesDaoImpl implements ReportedUpdateDao {
                     while (rs.next()) {
                         item = new ReportedUpdate();
 
-                        PullRequestDao pullRequestDao = new PullRequestDaoImpl(this.getDataSource());
+                        PullRequestDao pullRequestDao = new PullRequestDaoImplJdbc(this.getDataSource());
                         item.setPullRequest(pullRequestDao.findById(rs.getString(ReportedUpdate.PULLREQUEST_COLUMN)));
 
                         item.setReported(rs.getBoolean(ReportedUpdate.ISREPORTED_COLUMN));

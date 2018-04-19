@@ -30,14 +30,14 @@ public interface PullRequestDao {
 
         public static final String SQL_DELETE = "delete from " + PullRequest.TABLE_NAME + " where " + PullRequest.ID_COLUMN + " = ?";
 
-        public List<PullRequest> findAll();
+        public List<PullRequest> findAll() throws Exception;
         public PullRequest findById(String id);
-        public void insert(PullRequest item);
+        public void insert(PullRequest item) throws Exception;
         public void update(PullRequest item);
         public void delete(PullRequest item);
 
 
-        List<PullRequest> findAllOpen();
+        public List<PullRequest> findAllOpen();
 
 
 

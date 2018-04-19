@@ -2,8 +2,8 @@ package db;
 
 import dao.PullRequestDao;
 import dao.ReportedUpdateDao;
-import dao.impl.PullRequestDaoImpl;
-import dao.impl.ReportedUpdatesDaoImpl;
+import dao.impl.PullRequestDaoImplJdbc;
+import dao.impl.ReportedUpdatesDaoImplJdbc;
 import model.PullRequest;
 import model.PullRequestsData;
 import model.ReportedUpdate;
@@ -26,8 +26,8 @@ public class DbPullRequestDataManager {
     }
 
     public  PullRequestsData readPullRequestsDataFromDB() throws NullPointerException {
-        pullRequestDao = new PullRequestDaoImpl(dataSource);
-        reportedUpdateDao = new ReportedUpdatesDaoImpl(dataSource);
+        pullRequestDao = new PullRequestDaoImplJdbc(dataSource);
+        reportedUpdateDao = new ReportedUpdatesDaoImplJdbc(dataSource);
 
         List<PullRequest> pullRequests = pullRequestDao.findAllOpen();
         List<ReportedUpdate> reportedUpdates = reportedUpdateDao.findAll();
@@ -35,8 +35,8 @@ public class DbPullRequestDataManager {
     }
 
     public  void writePullRequestsDataToDB(PullRequestsData pullRequestsData) {
-        pullRequestDao = new PullRequestDaoImpl(dataSource);
-        reportedUpdateDao = new ReportedUpdatesDaoImpl(dataSource);
+        pullRequestDao = new PullRequestDaoImplJdbc(dataSource);
+        reportedUpdateDao = new ReportedUpdatesDaoImplJdbc(dataSource);
 
         List<PullRequest> pullRequests = pullRequestsData.getPullRequests();
         for (PullRequest item : pullRequests) {
@@ -63,7 +63,7 @@ public class DbPullRequestDataManager {
     }
 
     public  void writeReportUpdatesClosed() {
-        reportedUpdateDao = new ReportedUpdatesDaoImpl(dataSource);
+        reportedUpdateDao = new ReportedUpdatesDaoImplJdbc(dataSource);
         reportedUpdateDao.updateAllClose();
     }
 
