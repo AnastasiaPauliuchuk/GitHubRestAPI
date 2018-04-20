@@ -24,8 +24,8 @@
 
 
     <bean id="jenkinsManager" class="agent.JenkinsManager">
-        <constructor-arg type="java.lang.String" value="${jenkinsToken}"/>
         <constructor-arg type="java.lang.String" value="${jenkinsPostUrl}"/>
+        <constructor-arg type="java.lang.String" value="${jenkinsToken}"/>
     </bean>
 
 

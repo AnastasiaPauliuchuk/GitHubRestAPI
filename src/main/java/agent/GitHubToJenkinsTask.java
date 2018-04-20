@@ -65,7 +65,7 @@ public class GitHubToJenkinsTask extends TimerTask {
 
         logger.info("-----------------data ro report -----------------");
         logger.info("There are  " + resultData.getPullRequests().size() + " updated open pull request (s)");
-        if (resultData.getReportedUpdates().isEmpty()) {
+        if (!resultData.getReportedUpdates().isEmpty()) {
             logger.info("There are " + resultData.getReportedUpdates().size() + " new open updates");
             logger.info(resultData.getReportedUpdates().toString());
             resultData.getReportedUpdates().stream().forEach(item -> jenkinsManager.postData(item));
